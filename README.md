@@ -4,7 +4,7 @@ Firefox extension: double-click any word for a definition bubble, or use the too
 
 ## Status
 
-**v0.1.0 scaffold** — project structure, build pipeline, shared types, and stub entry points. Lookup providers and UI flows are implemented in subsequent todos.
+**v0.1.0** — scaffold + lookup orchestrator (normalization, variants, retries, cancellation). Dictionary providers and UI flows are next.
 
 ## Requirements
 
@@ -17,7 +17,18 @@ Firefox extension: double-click any word for a definition bubble, or use the too
 npm install
 npm run build    # output → dist/
 npm test
-npm start        # build + launch Firefox with the extension loaded
+npm start        # build + launch Firefox with extension loaded (temp profile copy)
+npm run load     # build only; prints path for manual install
+
+### Extension not showing?
+
+1. **Confirm it loaded:** open `about:debugging` → **This Firefox** — you should see “Dictionary on Click”.
+2. **Pin the icon:** click the puzzle piece in the toolbar → pin “Dictionary on Click”.
+3. **If `npm start` fails with `ECONNREFUSED`:** use manual load instead:
+   - `npm run load`
+   - Firefox → `about:debugging` → **This Firefox** → **Load Temporary Add-on…** → choose `dist/manifest.json`
+
+Do **not** use `--keep-profile-changes` with `web-ext` on Fedora — Firefox opens but the debugger connection often never completes, so the extension is never installed.
 ```
 
 For watch mode during development:

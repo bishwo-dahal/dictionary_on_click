@@ -1,13 +1,9 @@
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
-import {
-  DEFAULT_SETTINGS,
-  type LookupFailure,
-  type UserSettings,
-} from "../shared/types.js";
-import { formatErrorMessage } from "../shared/errors.js";
-import { getLanguageLabel } from "../shared/languages.js";
+import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
+import { getLookupOrchestrator } from "./lookup-orchestrator.js";
 
 const SETTINGS_KEY = "userSettings";
+const orchestrator = getLookupOrchestrator();
 
 async function loadSettings(): Promise<UserSettings> {
   const stored = await browser.storage.sync.get(SETTINGS_KEY);
@@ -20,23 +16,6 @@ async function saveSettings(partial: Partial<UserSettings>): Promise<UserSetting
   const next = { ...current, ...partial };
   await browser.storage.sync.set({ [SETTINGS_KEY]: next });
   return next;
-}
-
-function notImplementedFailure(
-  word: string,
-  language: UserSettings["dictionaryLanguage"],
-): LookupFailure {
-  return {
-    ok: false,
-    code: "API_ERROR",
-    message: formatErrorMessage("API_ERROR", {
-      word,
-      languageLabel: getLanguageLabel(language),
-    }),
-    word,
-    language,
-    retryable: true,
-  };
 }
 
 browser.runtime.onMessage.addListener(
@@ -64,8 +43,13 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
     case "prefetch": {
       const settings = await loadSettings();
       const language = message.language ?? settings.dictionaryLanguage;
-      // LookupOrchestrator wired in todo 2
-      return notImplementedFailure(message.word, language);
+      return orchestrator.lookup({
+        word: message.word,
+        language,
+        requestId: message.requestId,
+        prefetch: message.type === "prefetch",
+        singleToken: message.singleToken,
+      });
     }
 
     default: {

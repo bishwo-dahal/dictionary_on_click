@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "web-ext lint -s dist",
-    "start": "npm run build && web-ext run -s dist --firefox-profile dev-dictionary-on-click"
+    "start": "npm run build && web-ext run -s dist --firefox /usr/bin/firefox --firefox-profile .firefox-profile --profile-create-if-missing",
+    "load": "npm run build && echo \"\\nLoad in Firefox: about:debugging → This Firefox → Load Temporary Add-on → select:\\n  $(pwd)/dist/manifest.json\\n\""
   },
   "devDependencies": {
     "@types/firefox-webext-browser": "^143.0.0",
