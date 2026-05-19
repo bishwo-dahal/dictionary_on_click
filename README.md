@@ -4,7 +4,7 @@ Firefox extension: double-click any word for a definition bubble, or use the too
 
 ## Status
 
-**v0.1.0** — double-click definition bubble, toolbar dictionary, multi-provider lookups, and IndexedDB cache. Options/history/telemetry dashboards are next.
+**v0.1.0** — double-click bubble, full toolbar dictionary, options (history CSV, local telemetry, broken-word reports), and multi-provider lookups with IndexedDB cache.
 
 ## Requirements
 

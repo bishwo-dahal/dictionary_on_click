@@ -34,12 +34,14 @@ label {
   margin-bottom: 12px;
 }
 
-label select {
+label select,
+textarea {
   display: block;
   width: 100%;
   max-width: 24rem;
   margin-top: 4px;
   padding: 6px 8px;
+  font: inherit;
 }
 
 .checkbox {
@@ -51,6 +53,45 @@ label select {
 .hint {
   font-size: 0.85rem;
   opacity: 0.75;
+}
+
+.hint code {
+  font-size: 0.8rem;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.button-row button {
+  font: inherit;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, canvastext 20%, transparent);
+  background: color-mix(in srgb, canvastext 6%, canvas);
+  color: canvastext;
+}
+
+.telemetry-view {
+  font-size: 0.75rem;
+  padding: 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, canvastext 6%, canvas);
+  overflow-x: auto;
+  max-height: 240px;
+}
+
+.alert {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.9rem;
+  margin: 0 0 10px;
 }
 
 .status {

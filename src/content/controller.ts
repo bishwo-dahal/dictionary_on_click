@@ -72,8 +72,12 @@ export async function runLookup(
 }
 
 export function dismissBubble(): void {
+  const wasVisible = bubble.isVisible();
   activeRequestId = null;
   bubble.dismiss();
+  if (wasVisible) {
+    void browser.runtime.sendMessage({ type: "recordPopupDismissal" });
+  }
 }
 
 export function isBubbleVisible(): boolean {

@@ -21,6 +21,9 @@
           Translation target language
           <select id="target-language"></select>
         </label>
+        <p class="hint">
+          Translations use Wiktionary content in the target language when available.
+        </p>
       </section>
 
       <section>
@@ -29,18 +32,58 @@
           <input type="checkbox" id="save-history" />
           Save lookup history (stored locally only)
         </label>
-        <p class="hint">History and CSV export — coming in a later update.</p>
+        <div class="button-row">
+          <button type="button" id="download-history">Download CSV</button>
+          <button type="button" id="clear-history">Clear history</button>
+        </div>
+        <p id="history-count" class="hint"></p>
+      </section>
+
+      <section>
+        <h2>External extensions</h2>
+        <label class="checkbox">
+          <input type="checkbox" id="allow-external" />
+          Allow other extensions to read history
+        </label>
+        <label>
+          Allowed extension IDs (one per line)
+          <textarea id="allowed-ids" rows="3" placeholder="extension-id@mozilla.org"></textarea>
+        </label>
+        <p class="hint">
+          Other extensions can call <code>getHistory</code> / <code>getHistorySince</code> via
+          <code>runtime.sendMessage</code>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Diagnostics</h2>
+        <p id="telemetry-alert" class="alert" hidden></p>
+        <pre id="telemetry-view" class="telemetry-view"></pre>
+        <div class="button-row">
+          <button type="button" id="export-telemetry">Export telemetry JSON</button>
+          <button type="button" id="clear-telemetry">Clear telemetry</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Broken word reports</h2>
+        <p id="reports-count" class="hint"></p>
+        <div class="button-row">
+          <button type="button" id="export-reports">Export reports JSON</button>
+          <button type="button" id="clear-reports">Clear reports</button>
+        </div>
       </section>
 
       <section>
         <h2>Attribution</h2>
         <p>
           Definitions are sourced from
-          <a href="https://www.wiktionary.org/" target="_blank" rel="noopener"
-            >Wiktionary</a
-          >
-          (CC BY-SA). Please support the Wikimedia Foundation.
+          <a href="https://www.wiktionary.org/" target="_blank" rel="noopener">Wiktionary</a>
+          (CC BY-SA 4.0). English fallback data may use
+          <a href="https://dictionaryapi.dev/" target="_blank" rel="noopener">Free Dictionary API</a>
+          and <a href="https://www.datamuse.com/" target="_blank" rel="noopener">Datamuse</a>.
         </p>
+        <p class="hint">No remote telemetry — all stats stay on this device.</p>
       </section>
 
       <p id="status" class="status" role="status"></p>

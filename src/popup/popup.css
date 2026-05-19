@@ -6,17 +6,31 @@
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 360px;
+  max-width: 420px;
 }
 
 .popup {
-  padding: 12px;
+  padding: 12px 14px 14px;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 .popup h1 {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 1rem;
   font-weight: 600;
+}
+
+.options-link {
+  font-size: 0.8rem;
+  color: #2563eb;
+  text-decoration: none;
 }
 
 #lookup-form {
@@ -28,6 +42,11 @@ body {
 #word-input {
   flex: 1;
   padding: 6px 8px;
+}
+
+#lookup-form button {
+  padding: 6px 12px;
+  cursor: pointer;
 }
 
 .lang-label {
@@ -43,15 +62,65 @@ body {
 }
 
 .result {
-  min-height: 48px;
+  max-height: 420px;
+  overflow-y: auto;
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.45;
+}
+
+.result--muted {
+  opacity: 0.7;
 }
 
 .result--error {
   color: #b91c1c;
 }
 
-.result--muted {
-  opacity: 0.7;
+.result-head {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.result-meta {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+.def-list {
+  margin: 0 0 12px;
+  padding-left: 1.1rem;
+}
+
+.def-list li {
+  margin-bottom: 6px;
+}
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, canvastext 12%, transparent);
+}
+
+.result-actions a,
+.result-actions button {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, canvastext 18%, transparent);
+  background: color-mix(in srgb, canvastext 6%, canvas);
+  color: canvastext;
+}
+
+.result-actions .primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
 }
