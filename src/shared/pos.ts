@@ -8,8 +8,9 @@ export function posClassName(partOfSpeech: string): string {
   return key ? `pos pos--${key}` : "pos";
 }
 
-/** Alert-triangle — reads clearly at small sizes for “report issue”. */
-export const REPORT_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
+import { REPORT_ICON_SVG } from "./ui-icons.js";
+
+export { REPORT_ICON_SVG } from "./ui-icons.js";
 
 const REPORT_DONE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
 

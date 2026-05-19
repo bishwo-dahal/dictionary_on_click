@@ -1,5 +1,8 @@
 import type { BackgroundRequest, BackgroundResponse } from "./messages.js";
 import type { DictionaryLanguageId } from "./languages.js";
+import { SPEAK_ICON_SVG } from "./ui-icons.js";
+
+export { SPEAK_ICON_SVG } from "./ui-icons.js";
 
 const SPEECH_LANG: Record<DictionaryLanguageId, string> = {
   ar: "ar-SA",
@@ -25,8 +28,6 @@ const SPEECH_LANG: Record<DictionaryLanguageId, string> = {
 export function speechLangFor(language: DictionaryLanguageId): string {
   return SPEECH_LANG[language];
 }
-
-export const SPEAK_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 5.636a9 9 0 0 1 0 12.728"/></svg>`;
 
 let ttsFrame: HTMLIFrameElement | null = null;
 let currentObjectUrl: string | null = null;

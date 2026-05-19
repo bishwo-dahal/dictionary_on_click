@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "icons": "node scripts/generate-icons.mjs",
+    "build": "node scripts/generate-icons.mjs && node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
     "test": "vitest run",
     "test:watch": "vitest",
