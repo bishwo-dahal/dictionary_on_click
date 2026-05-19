@@ -13,7 +13,11 @@
     "lint": "web-ext lint -s dist",
     "ci": "npm test && npm run build && npm run lint",
     "start": "npm run build && web-ext run -s dist --firefox /usr/bin/firefox --firefox-profile .firefox-profile --profile-create-if-missing",
-    "load": "npm run build && echo \"\\nLoad in Firefox: about:debugging → This Firefox → Load Temporary Add-on → select:\\n  $(pwd)/dist/manifest.json\\n\""
+    "load": "npm run build && echo \"\\nLoad in Firefox: about:debugging → This Firefox → Load Temporary Add-on → select:\\n  $(pwd)/dist/manifest.json\\n\"",
+    "package": "npm run build && web-ext build -s dist"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
     "@types/firefox-webext-browser": "^143.0.0",

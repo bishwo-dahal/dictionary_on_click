@@ -14,7 +14,19 @@ npm start     # load in Firefox
 ## Requirements
 
 - Node.js 20+
-- Firefox 120+
+- ImageMagick 7 (`magick`) — for icon generation
+- Firefox 140+ (see `manifest.json` `strict_min_version`)
+
+## Build from source (AMO / reviewers)
+
+**Human-readable source** is in `src/` (TypeScript). **Built add-on** is in `dist/` after:
+
+```bash
+npm ci
+npm run build
+```
+
+Full step-by-step instructions, tool versions, and environment requirements: **[BUILD.md](./BUILD.md)**.
 
 ## Development
 
@@ -24,6 +36,7 @@ npm run build    # output → dist/
 npm test
 npm start        # build + launch Firefox with extension loaded (temp profile copy)
 npm run load     # build only; prints path for manual install
+```
 
 ### Extension not showing?
 
@@ -50,7 +63,7 @@ src/
   background/     Service worker, lookup orchestration, providers
   content/        Double-click bubble, selection prefetch
   popup/          Toolbar dictionary UI
-  options/        Settings, history, telemetry (later todos)
+  options/        Settings, history, telemetry, reports
   shared/         Types, errors, languages, message protocol
 dist/             Built extension (gitignored)
 ```
