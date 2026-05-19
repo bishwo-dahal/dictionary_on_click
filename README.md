@@ -4,7 +4,7 @@ Firefox extension: double-click any word for a definition bubble, or use the too
 
 ## Status
 
-**v0.1.0** — scaffold, lookup orchestrator, and dictionary providers (Wiktionary, Free Dictionary API, Datamuse, IndexedDB cache). Double-click bubble UI is next.
+**v0.1.0** — double-click definition bubble, toolbar dictionary, multi-provider lookups, and IndexedDB cache. Options/history/telemetry dashboards are next.
 
 ## Requirements
 

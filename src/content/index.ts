@@ -1,7 +1,5 @@
-/**
- * Content script entry — wires selection, double-click, and bubble (todo 4).
- */
-import "./selection.js";
+import { initContentController } from "./controller.js";
 import "./double-click.js";
+import "./selection.js";
 
-console.info("[Dictionary on Click] content script loaded");
+void initContentController();
