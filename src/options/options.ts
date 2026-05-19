@@ -3,7 +3,7 @@ import { telemetryFailureRate } from "../background/telemetry.js";
 import { LANGUAGES } from "../shared/languages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
-import type { TelemetrySnapshot } from "../shared/telemetry-types.js";
+import type { ProviderHealthInfo, TelemetrySnapshot } from "../shared/telemetry-types.js";
 import type { UserSettings } from "../shared/types.js";
 
 const dictSelect = document.getElementById(
@@ -26,6 +26,9 @@ const telemetryView = document.getElementById("telemetry-view") as HTMLPreElemen
 const telemetryAlert = document.getElementById("telemetry-alert") as HTMLParagraphElement;
 const reportsCountEl = document.getElementById("reports-count") as HTMLParagraphElement;
 const statusEl = document.getElementById("status") as HTMLParagraphElement;
+const providerHealthBody = document.getElementById(
+  "provider-health-body",
+) as HTMLTableSectionElement;
 
 function fillSelect(select: HTMLSelectElement): void {
   for (const lang of LANGUAGES) {
@@ -68,6 +71,44 @@ async function load(): Promise<UserSettings> {
 async function save(partial: Partial<UserSettings>): Promise<void> {
   await send({ type: "saveSettings", settings: partial });
   showStatus("Settings saved.");
+}
+
+function renderProviderHealth(providers: ProviderHealthInfo[]): void {
+  providerHealthBody.replaceChildren();
+
+  for (const p of providers) {
+    const row = document.createElement("tr");
+
+    const name = document.createElement("td");
+    name.textContent = p.label;
+
+    const status = document.createElement("td");
+    const pill = document.createElement("span");
+    pill.className = `status-pill status-pill--${p.status}`;
+    pill.textContent =
+      p.status === "unavailable"
+        ? "Unavailable"
+        : p.status === "degraded"
+          ? "Degraded"
+          : "Healthy";
+    status.append(pill);
+
+    const rate = document.createElement("td");
+    rate.textContent =
+      p.recentCalls === 0 ? "—" : `${(p.successRate * 100).toFixed(0)}%`;
+
+    const p50 = document.createElement("td");
+    p50.textContent = p.p50Ms > 0 ? `${p.p50Ms}ms` : "—";
+
+    const p95 = document.createElement("td");
+    p95.textContent = p.p95Ms > 0 ? `${p.p95Ms}ms` : "—";
+
+    const err = document.createElement("td");
+    err.textContent = p.lastError ?? "—";
+
+    row.append(name, status, rate, p50, p95, err);
+    providerHealthBody.append(row);
+  }
 }
 
 function renderTelemetry(snap: TelemetrySnapshot): void {
@@ -190,6 +231,11 @@ async function init(): Promise<void> {
   const tel = await send({ type: "getTelemetry" });
   if (tel.type === "telemetry") {
     renderTelemetry(tel.snapshot);
+  }
+
+  const health = await send({ type: "getProviderHealth" });
+  if (health.type === "providerHealth") {
+    renderProviderHealth(health.providers);
   }
 
   await refreshHistoryCount();

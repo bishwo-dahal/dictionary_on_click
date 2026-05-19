@@ -3,6 +3,7 @@ import type { BrokenWordReport } from "../shared/telemetry-types.js";
 import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
+import { getProviderHealth } from "./health.js";
 import {
   clearTelemetry,
   getTelemetry,
@@ -105,6 +106,9 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
 
     case "getTelemetry":
       return { type: "telemetry", snapshot: await getTelemetry() };
+
+    case "getProviderHealth":
+      return { type: "providerHealth", providers: getProviderHealth() };
 
     case "clearTelemetry":
       await clearTelemetry();

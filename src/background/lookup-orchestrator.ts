@@ -7,6 +7,7 @@ import {
 } from "../shared/errors.js";
 import type { LookupFailure, LookupResponse, LookupResult } from "../shared/types.js";
 import { generateVariants, normalizeInput } from "./normalize.js";
+import { isProviderAvailable, recordProviderOutcome } from "./health.js";
 import {
   createDefaultProviders,
   datamuseSpellSuggest,
@@ -156,9 +157,16 @@ export class LookupOrchestrator {
             break;
           }
 
+          if (!isProviderAvailable(provider.id)) {
+            continue;
+          }
+
+          const started = performance.now();
           const outcome = await this.queryProvider(provider, variant, req.language, signal);
+          const latencyMs = performance.now() - started;
 
           if (outcome.kind === "hit") {
+            recordProviderOutcome(provider.id, "ok", latencyMs);
             if (provider.id !== "cache") {
               void saveToCache(outcome.result);
             }
@@ -166,11 +174,18 @@ export class LookupOrchestrator {
           }
 
           if (outcome.kind === "stale") {
+            recordProviderOutcome(provider.id, "ok", latencyMs);
             staleHit = outcome.result;
             continue;
           }
 
+          if (outcome.kind === "miss") {
+            recordProviderOutcome(provider.id, "miss", latencyMs);
+            continue;
+          }
+
           if (outcome.kind === "error") {
+            recordProviderOutcome(provider.id, "fail", latencyMs, outcome.code);
             errors.push(outcome.code);
             if (outcome.code === "OFFLINE") {
               return failure("OFFLINE", normalized, req.language);

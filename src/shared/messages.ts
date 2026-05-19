@@ -1,8 +1,13 @@
 import type { DictionaryLanguageId } from "./languages.js";
-import type { BrokenWordReport, HistoryEntry, TelemetrySnapshot } from "./telemetry-types.js";
+import type {
+  BrokenWordReport,
+  HistoryEntry,
+  ProviderHealthInfo,
+  TelemetrySnapshot,
+} from "./telemetry-types.js";
 import type { LookupResponse, UserSettings } from "./types.js";
 
-export type { BrokenWordReport, HistoryEntry, TelemetrySnapshot };
+export type { BrokenWordReport, HistoryEntry, ProviderHealthInfo, TelemetrySnapshot };
 
 /** Messages sent from content scripts / popup / options to the background worker. */
 export type BackgroundRequest =
@@ -25,6 +30,7 @@ export type BackgroundRequest =
   | { type: "getHistory" }
   | { type: "clearHistory" }
   | { type: "getTelemetry" }
+  | { type: "getProviderHealth" }
   | { type: "clearTelemetry" }
   | { type: "recordPopupDismissal" }
   | { type: "getBrokenReports" }
@@ -36,6 +42,7 @@ export type BackgroundResponse =
   | { type: "settings"; settings: UserSettings }
   | { type: "history"; entries: HistoryEntry[] }
   | { type: "telemetry"; snapshot: TelemetrySnapshot }
+  | { type: "providerHealth"; providers: ProviderHealthInfo[] }
   | { type: "brokenReports"; reports: BrokenWordReport[] }
   | { type: "ok" }
   | { type: "pong" };

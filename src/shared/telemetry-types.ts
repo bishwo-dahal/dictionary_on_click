@@ -34,3 +34,17 @@ export interface BrokenWordReport {
   language: string;
   pageUrl: string;
 }
+
+export type ProviderHealthStatus = "healthy" | "degraded" | "unavailable";
+
+export interface ProviderHealthInfo {
+  id: ProviderId;
+  label: string;
+  status: ProviderHealthStatus;
+  successRate: number;
+  p50Ms: number;
+  p95Ms: number;
+  recentCalls: number;
+  lastError?: LookupErrorCode;
+  skippedUntil?: number;
+}

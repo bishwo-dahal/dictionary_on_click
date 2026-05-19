@@ -85,6 +85,43 @@ textarea {
   max-height: 240px;
 }
 
+.health-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 8px 0 16px;
+}
+
+.health-table th,
+.health-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid color-mix(in srgb, canvastext 12%, transparent);
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-pill--healthy {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill--degraded {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-pill--unavailable {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .alert {
   padding: 10px 12px;
   border-radius: 8px;

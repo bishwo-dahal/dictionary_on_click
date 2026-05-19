@@ -56,6 +56,24 @@
       </section>
 
       <section>
+        <h2>Provider health</h2>
+        <p class="hint">Circuit breaker skips providers with high failure rates for 5 minutes.</p>
+        <table id="provider-health" class="health-table">
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Status</th>
+              <th>Success</th>
+              <th>p50</th>
+              <th>p95</th>
+              <th>Last error</th>
+            </tr>
+          </thead>
+          <tbody id="provider-health-body"></tbody>
+        </table>
+      </section>
+
+      <section>
         <h2>Diagnostics</h2>
         <p id="telemetry-alert" class="alert" hidden></p>
         <pre id="telemetry-view" class="telemetry-view"></pre>
