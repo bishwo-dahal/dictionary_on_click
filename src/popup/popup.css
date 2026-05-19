@@ -1,126 +1,298 @@
+/* Firefox extension popups need explicit base styles — UA defaults leak through otherwise. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 :root {
   color-scheme: light dark;
-  font-family: system-ui, sans-serif;
-  font-size: 14px;
+
+  --bg: #f8fafc;
+  --bg-elevated: #ffffff;
+  --fg: #0f172a;
+  --fg-muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --error: #b91c1c;
+  --radius: 8px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Ubuntu,
+    Cantarell, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --bg-elevated: #1e293b;
+    --fg: #f1f5f9;
+    --fg-muted: #94a3b8;
+    --border: #334155;
+    --accent: #3b82f6;
+    --accent-hover: #60a5fa;
+    --error: #f87171;
+  }
+}
+
+html {
+  width: 380px;
+  height: auto;
 }
 
 body {
   margin: 0;
-  min-width: 360px;
-  max-width: 420px;
+  padding: 0;
+  width: 380px;
+  min-height: 140px;
+  max-height: 560px;
+  overflow: hidden;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .popup {
-  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px 16px;
+  max-height: 560px;
 }
 
 .popup-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .popup h1 {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--fg);
 }
 
 .options-link {
-  font-size: 0.8rem;
-  color: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
   text-decoration: none;
+  white-space: nowrap;
+}
+
+.options-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
 }
 
 #lookup-form {
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 #word-input {
   flex: 1;
-  padding: 6px 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--fg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+}
+
+#word-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+#word-input::placeholder {
+  color: var(--fg-muted);
 }
 
 #lookup-form button {
-  padding: 6px 12px;
+  margin: 0;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
   cursor: pointer;
+  white-space: nowrap;
+}
+
+#lookup-form button:hover {
+  background: var(--accent-hover);
 }
 
 .lang-label {
   display: block;
-  margin-bottom: 10px;
-  font-size: 0.85rem;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  flex-shrink: 0;
 }
 
 .lang-label select {
   display: block;
   width: 100%;
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
 }
 
 .result {
-  max-height: 420px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  font-size: 0.9rem;
-  line-height: 1.45;
+  margin: 0 -4px;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
-.result--muted {
-  opacity: 0.7;
+.result--loading {
+  color: var(--fg-muted);
+  font-style: italic;
+  padding: 8px 0;
 }
 
 .result--error {
-  color: #b91c1c;
+  color: var(--error);
+}
+
+.result-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
 }
 
 .result-head {
-  margin: 0 0 8px;
-  font-size: 1.1rem;
+  margin: 0 0 4px;
+  font-size: 20px;
   font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--fg);
 }
 
 .result-meta {
-  margin: 0 0 10px;
-  font-size: 0.75rem;
-  opacity: 0.65;
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.result-meta .badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fg-muted) 15%, transparent);
+  vertical-align: middle;
 }
 
 .def-list {
-  margin: 0 0 12px;
-  padding-left: 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.def-list li {
-  margin-bottom: 6px;
+.def-item {
+  margin: 0;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.def-item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.def-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--fg);
+  word-wrap: break-word;
+}
+
+.result-empty {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 13px;
 }
 
 .result-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid color-mix(in srgb, canvastext 12%, transparent);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 
-.result-actions a,
-.result-actions button {
+.result-actions button,
+.result-actions a {
+  margin: 0;
+  padding: 7px 12px;
   font: inherit;
-  font-size: 0.8rem;
-  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
   border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
-  border: 1px solid color-mix(in srgb, canvastext 18%, transparent);
-  background: color-mix(in srgb, canvastext 6%, canvas);
-  color: canvastext;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
 }
 
-.result-actions .primary {
-  background: #2563eb;
-  border-color: #2563eb;
+.result-actions button:hover,
+.result-actions a:hover {
+  background: color-mix(in srgb, var(--fg) 6%, var(--bg-elevated));
+}
+
+.result-actions a.primary {
   color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.result-actions a.primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.result-error-msg {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
 }

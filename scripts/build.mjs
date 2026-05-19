@@ -1,7 +1,7 @@
 import * as esbuild from "esbuild";
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -15,7 +15,7 @@ const entryPoints = {
   "options/options": join(root, "src/options/options.ts"),
 };
 
-function copyStaticAssets() {
+async function copyStaticAssets() {
   mkdirSync(dist, { recursive: true });
 
   const manifest = JSON.parse(
@@ -23,8 +23,14 @@ function copyStaticAssets() {
   );
   writeFileSync(join(dist, "manifest.json"), JSON.stringify(manifest, null, 2));
 
+  const { POS_AND_ICON_STYLES } = await import(
+    pathToFileURL(join(root, "src/shared/pos-styles.ts")).href,
+  );
+
   cpSync(join(root, "src/popup/index.html"), join(dist, "popup/index.html"));
-  cpSync(join(root, "src/popup/popup.css"), join(dist, "popup/popup.css"));
+  const popupCss =
+    readFileSync(join(root, "src/popup/popup.css"), "utf8") + POS_AND_ICON_STYLES;
+  writeFileSync(join(dist, "popup/popup.css"), popupCss);
   cpSync(join(root, "src/options/index.html"), join(dist, "options/index.html"));
   cpSync(join(root, "src/options/options.css"), join(dist, "options/options.css"));
   cpSync(join(root, "assets"), join(dist, "assets"), { recursive: true });
@@ -42,7 +48,7 @@ const buildOptions = {
 
 async function build() {
   rmSync(dist, { recursive: true, force: true });
-  copyStaticAssets();
+  await copyStaticAssets();
   if (watch) {
     const ctx = await esbuild.context(buildOptions);
     await ctx.watch();

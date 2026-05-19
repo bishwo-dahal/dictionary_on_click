@@ -1,4 +1,9 @@
 import type { LookupResponse } from "../shared/types.js";
+import {
+  createPosSpan,
+  createReportIconButton,
+  markReportButtonDone,
+} from "../shared/pos.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
 
 const FAILSAFE_MS = 15_000;
@@ -16,6 +21,22 @@ interface ReportEntry {
   pageUrl: string;
 }
 
+function createGlossLine(partOfSpeech: string | undefined, text: string): HTMLParagraphElement {
+  const line = document.createElement("p");
+  line.className = "gloss-line";
+
+  if (partOfSpeech) {
+    line.append(createPosSpan(partOfSpeech));
+  }
+
+  const span = document.createElement("span");
+  span.className = "gloss-text";
+  span.textContent = text;
+  line.append(span);
+
+  return line;
+}
+
 export class DefinitionBubble {
   private host: HTMLDivElement | null = null;
   private shadow: ShadowRoot | null = null;
@@ -31,9 +52,12 @@ export class DefinitionBubble {
 
     this.card.replaceChildren();
 
+    const header = document.createElement("div");
+    header.className = "card-header";
     const head = document.createElement("p");
     head.className = "headword";
     head.textContent = word;
+    header.append(head);
 
     const sk1 = document.createElement("div");
     sk1.className = "skeleton";
@@ -44,7 +68,7 @@ export class DefinitionBubble {
     status.className = "status";
     status.textContent = "Looking up…";
 
-    this.card.append(head, sk1, sk2, status);
+    this.card.append(header, sk1, sk2, status);
   }
 
   showResult(response: LookupResponse, anchor: BubbleAnchor): void {
@@ -56,29 +80,41 @@ export class DefinitionBubble {
     this.card.replaceChildren();
 
     if (!response.ok) {
+      const header = document.createElement("div");
+      header.className = "card-header";
       const head = document.createElement("p");
       head.className = "headword";
       head.textContent = response.word;
+      header.append(head);
+
       const err = document.createElement("p");
       err.className = "status status--error";
       err.textContent = response.message;
-      this.card.append(head, err);
+      this.card.append(header, err);
       this.reposition(anchor);
       return;
     }
 
     const { result } = response;
+
+    const header = document.createElement("div");
+    header.className = "card-header";
     const head = document.createElement("p");
     head.className = "headword";
     head.textContent = result.word;
-    this.card.append(head);
+    header.append(head);
+
+    header.append(
+      createReportIconButton((btn) => {
+        void this.queueReport(result.word, result.language);
+        markReportButtonDone(btn);
+      }),
+    );
+
+    this.card.append(header);
 
     for (const def of result.definitions.slice(0, 2)) {
-      const p = document.createElement("p");
-      p.className = "gloss";
-      const pos = def.partOfSpeech ? `${def.partOfSpeech}: ` : "";
-      p.textContent = `${pos}${def.text}`;
-      this.card.append(p);
+      this.card.append(createGlossLine(def.partOfSpeech, def.text));
     }
 
     if (result.partial || result.stale) {
@@ -100,16 +136,7 @@ export class DefinitionBubble {
     full.rel = "noopener noreferrer";
     full.textContent = "See full definition";
 
-    const report = document.createElement("button");
-    report.type = "button";
-    report.textContent = "Report broken word";
-    report.addEventListener("click", () => {
-      void this.queueReport(result.word, result.language);
-      report.textContent = "Reported — thanks";
-      report.disabled = true;
-    });
-
-    actions.append(full, report);
+    actions.append(full);
     this.card.append(actions);
     this.reposition(anchor);
   }
@@ -169,7 +196,7 @@ export class DefinitionBubble {
     }
 
     const margin = 8;
-    const cardWidth = Math.min(360, Math.max(200, this.card.offsetWidth || 280));
+    const cardWidth = Math.min(560, Math.max(380, this.card.offsetWidth || 440));
     const cardHeight = this.card.offsetHeight || 140;
 
     let left = anchor.x - cardWidth / 2;

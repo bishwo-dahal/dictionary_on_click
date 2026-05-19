@@ -1,9 +1,15 @@
 import { LANGUAGES, getLanguageLabel } from "../shared/languages.js";
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
 import { isLookupResponse } from "../shared/messages.js";
-import { formatDefinition } from "../shared/render.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
-import type { LookupResult } from "../shared/types.js";
+import {
+  createPosSpan,
+  createReportIconButton,
+  markReportButtonDone,
+} from "../shared/pos.js";
+import type { Definition, LookupResult } from "../shared/types.js";
+
+const REPORT_KEY = "brokenWordReports";
 
 const form = document.getElementById("lookup-form") as HTMLFormElement;
 const wordInput = document.getElementById("word-input") as HTMLInputElement;
@@ -26,40 +32,23 @@ async function send(message: BackgroundRequest): Promise<BackgroundResponse> {
   return browser.runtime.sendMessage(message) as Promise<BackgroundResponse>;
 }
 
-function renderSuccess(result: LookupResult): void {
-  resultEl.className = "result";
-  resultEl.replaceChildren();
+function createDefItem(def: Definition): HTMLLIElement {
+  const li = document.createElement("li");
+  li.className = "def-item";
 
-  const head = document.createElement("h2");
-  head.className = "result-head";
-  head.textContent = result.word;
-
-  const meta = document.createElement("p");
-  meta.className = "result-meta";
-  const parts = [getLanguageLabel(result.language), result.provider];
-  if (result.stale) {
-    parts.push("cached");
-  }
-  if (result.partial) {
-    parts.push("partial");
-  }
-  meta.textContent = parts.join(" · ");
-
-  const list = document.createElement("ol");
-  list.className = "def-list";
-  for (const def of result.definitions) {
-    const li = document.createElement("li");
-    li.textContent = formatDefinition(def);
-    list.appendChild(li);
+  if (def.partOfSpeech) {
+    li.append(createPosSpan(def.partOfSpeech));
   }
 
-  if (result.definitions.length === 0) {
-    const empty = document.createElement("p");
-    empty.textContent = "No definition text available.";
-    resultEl.append(head, meta, empty);
-    return;
-  }
+  const text = document.createElement("p");
+  text.className = "def-text";
+  text.textContent = def.text;
+  li.append(text);
 
+  return li;
+}
+
+function createActions(result: LookupResult): HTMLDivElement {
   const actions = document.createElement("div");
   actions.className = "result-actions";
 
@@ -67,8 +56,11 @@ function renderSuccess(result: LookupResult): void {
   copyBtn.type = "button";
   copyBtn.textContent = "Copy";
   copyBtn.addEventListener("click", () => {
-    const text = result.definitions.map((d) => formatDefinition(d)).join("\n");
-    void navigator.clipboard.writeText(`${result.word}\n${text}`);
+    const lines = result.definitions.map((d) => {
+      const pos = d.partOfSpeech ? `(${d.partOfSpeech}) ` : "";
+      return `${pos}${d.text}`;
+    });
+    void navigator.clipboard.writeText(`${result.word}\n\n${lines.join("\n\n")}`);
     copyBtn.textContent = "Copied";
     window.setTimeout(() => {
       copyBtn.textContent = "Copy";
@@ -83,18 +75,92 @@ function renderSuccess(result: LookupResult): void {
   wiki.textContent = "Open in Wiktionary";
 
   actions.append(copyBtn, wiki);
-  resultEl.append(head, meta, list, actions);
+  return actions;
+}
+
+async function queueReport(word: string, language: string): Promise<void> {
+  const stored = await browser.storage.local.get(REPORT_KEY);
+  const list =
+    (stored[REPORT_KEY] as { timestamp: number; word: string; language: string }[] | undefined) ??
+    [];
+  list.push({ timestamp: Date.now(), word, language });
+  await browser.storage.local.set({ [REPORT_KEY]: list.slice(-500) });
+}
+
+function renderSuccess(result: LookupResult): void {
+  resultEl.className = "result";
+  resultEl.replaceChildren();
+
+  const card = document.createElement("div");
+  card.className = "result-card";
+
+  const header = document.createElement("div");
+  header.className = "result-header";
+
+  const head = document.createElement("h2");
+  head.className = "result-head";
+  head.textContent = result.word;
+  header.append(head);
+
+  header.append(
+    createReportIconButton((btn) => {
+      void queueReport(result.word, result.language);
+      markReportButtonDone(btn);
+    }),
+  );
+
+  const meta = document.createElement("p");
+  meta.className = "result-meta";
+  meta.textContent = `${getLanguageLabel(result.language)} · ${result.provider}`;
+  if (result.stale) {
+    const b = document.createElement("span");
+    b.className = "badge";
+    b.textContent = "cached";
+    meta.append(b);
+  } else if (result.partial) {
+    const b = document.createElement("span");
+    b.className = "badge";
+    b.textContent = "partial";
+    meta.append(b);
+  }
+
+  card.append(header, meta);
+
+  if (result.definitions.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "result-empty";
+    empty.textContent = "No definition text available.";
+    card.append(empty);
+  } else {
+    const list = document.createElement("ol");
+    list.className = "def-list";
+    for (const def of result.definitions) {
+      list.append(createDefItem(def));
+    }
+    card.append(list);
+    card.append(createActions(result));
+  }
+
+  resultEl.append(card);
 }
 
 function renderError(message: string, word: string): void {
   resultEl.className = "result result--error";
   resultEl.replaceChildren();
+
+  const card = document.createElement("div");
+  card.className = "result-card";
+
   const head = document.createElement("h2");
   head.className = "result-head";
   head.textContent = word;
-  const p = document.createElement("p");
-  p.textContent = message;
-  resultEl.append(head, p);
+
+  const msg = document.createElement("p");
+  msg.className = "result-error-msg";
+  msg.textContent = message;
+
+  card.append(head, msg);
+  resultEl.append(card);
 }
 
 async function runLookup(): Promise<void> {
@@ -103,7 +169,7 @@ async function runLookup(): Promise<void> {
     return;
   }
 
-  resultEl.className = "result result--muted";
+  resultEl.className = "result result--loading";
   resultEl.textContent = "Looking up…";
 
   const response = await send({

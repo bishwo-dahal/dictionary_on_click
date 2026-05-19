@@ -1,0 +1,109 @@
+/** POS badges + icon buttons (bubble shadow DOM + appended to popup.css at build). */
+export const POS_AND_ICON_STYLES = `
+.pos {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  border-radius: 4px;
+  vertical-align: baseline;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.pos--noun, .pos--n { color: #1d4ed8; background: #dbeafe; }
+.pos--verb, .pos--v { color: #15803d; background: #dcfce7; }
+.pos--adjective, .pos--adj, .pos--a { color: #7e22ce; background: #f3e8ff; }
+.pos--adverb, .pos--adv { color: #c2410c; background: #ffedd5; }
+.pos--pronoun, .pos--pron { color: #0e7490; background: #cffafe; }
+.pos--preposition, .pos--prep { color: #a16207; background: #fef9c3; }
+.pos--conjunction, .pos--conj { color: #be185d; background: #fce7f3; }
+.pos--interjection, .pos--intj { color: #b45309; background: #fef3c7; }
+
+@media (prefers-color-scheme: dark) {
+  .pos { color: #93c5fd; background: #1e3a8a; }
+  .pos--noun, .pos--n { color: #93c5fd; background: #1e3a5f; }
+  .pos--verb, .pos--v { color: #86efac; background: #14532d; }
+  .pos--adjective, .pos--adj, .pos--a { color: #d8b4fe; background: #581c87; }
+  .pos--adverb, .pos--adv { color: #fdba74; background: #7c2d12; }
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  line-height: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: color-mix(in srgb, currentColor 45%, transparent);
+  cursor: pointer;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.icon-btn svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover {
+  color: currentColor;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, currentColor 40%, transparent);
+  outline-offset: 2px;
+}
+
+.icon-btn:disabled {
+  cursor: default;
+}
+
+.icon-btn.report-btn--done {
+  color: #16a34a;
+  background: color-mix(in srgb, #16a34a 12%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  .icon-btn.report-btn--done {
+    color: #4ade80;
+    background: color-mix(in srgb, #4ade80 14%, transparent);
+  }
+}
+
+.card-header, .result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.card-header .headword, .result-header .result-head {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.gloss-line { margin: 0 0 8px; font-size: 13px; line-height: 1.5; }
+.gloss-line:last-of-type { margin-bottom: 10px; }
+.gloss-text { display: inline; }
+
+.def-item .pos {
+  display: block;
+  margin-right: 0;
+  margin-bottom: 4px;
+}
+
+.card-header .headword { margin: 0; }
+`;

@@ -1,3 +1,5 @@
+import { POS_AND_ICON_STYLES } from "../shared/pos-styles.js";
+
 export const BUBBLE_STYLES = `
 :host {
   all: initial;
@@ -9,8 +11,8 @@ export const BUBBLE_STYLES = `
 
 .card {
   box-sizing: border-box;
-  max-width: 360px;
-  min-width: 200px;
+  max-width: 560px;
+  min-width: 380px;
   padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, canvastext 18%, transparent);
@@ -59,7 +61,8 @@ export const BUBBLE_STYLES = `
   gap: 8px;
 }
 
-button, a.btn {
+.actions button,
+a.btn {
   font: inherit;
   font-size: 12px;
   cursor: pointer;
@@ -71,13 +74,15 @@ button, a.btn {
   color: canvastext;
 }
 
-button.primary, a.btn.primary {
+.actions button.primary,
+a.btn.primary {
   background: #2563eb;
   border-color: #2563eb;
   color: #fff;
 }
 
-button:hover, a.btn:hover {
+.actions button:hover,
+a.btn:hover {
   filter: brightness(1.05);
 }
 
@@ -99,4 +104,5 @@ button:hover, a.btn:hover {
   0% { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
+${POS_AND_ICON_STYLES}
 `;
