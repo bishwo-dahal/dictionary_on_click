@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dictionary on Click</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <h1>Dictionary</h1>
+      <form id="lookup-form">
+        <input
+          id="word-input"
+          type="search"
+          placeholder="Look up a word or phrase…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button type="submit">Look up</button>
+      </form>
+      <label class="lang-label">
+        Language
+        <select id="language-select"></select>
+      </label>
+      <div id="result" class="result" aria-live="polite"></div>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

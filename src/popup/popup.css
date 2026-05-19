@@ -1,0 +1,57 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+.popup {
+  padding: 12px;
+}
+
+.popup h1 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+#lookup-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+#word-input {
+  flex: 1;
+  padding: 6px 8px;
+}
+
+.lang-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.lang-label select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.result {
+  min-height: 48px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.result--error {
+  color: #b91c1c;
+}
+
+.result--muted {
+  opacity: 0.7;
+}

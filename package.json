@@ -1,0 +1,24 @@
+{
+  "name": "dictionary-on-click",
+  "version": "0.1.0",
+  "description": "Firefox dictionary extension — double-click any word for definitions",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "web-ext lint -s dist",
+    "start": "npm run build && web-ext run -s dist --firefox-profile dev-dictionary-on-click"
+  },
+  "devDependencies": {
+    "@types/firefox-webext-browser": "^143.0.0",
+    "@types/node": "^22.15.21",
+    "esbuild": "^0.25.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4",
+    "web-ext": "^10.1.0"
+  },
+  "license": "MPL-2.0"
+}

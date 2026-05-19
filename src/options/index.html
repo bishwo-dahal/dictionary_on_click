@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dictionary on Click — Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="options">
+      <h1>Dictionary on Click</h1>
+      <p class="version">Version 0.1.0</p>
+
+      <section>
+        <h2>Languages</h2>
+        <label>
+          Dictionary language
+          <select id="dictionary-language"></select>
+        </label>
+        <label>
+          Translation target language
+          <select id="target-language"></select>
+        </label>
+      </section>
+
+      <section>
+        <h2>History</h2>
+        <label class="checkbox">
+          <input type="checkbox" id="save-history" />
+          Save lookup history (stored locally only)
+        </label>
+        <p class="hint">History and CSV export — coming in a later update.</p>
+      </section>
+
+      <section>
+        <h2>Attribution</h2>
+        <p>
+          Definitions are sourced from
+          <a href="https://www.wiktionary.org/" target="_blank" rel="noopener"
+            >Wiktionary</a
+          >
+          (CC BY-SA). Please support the Wikimedia Foundation.
+        </p>
+      </section>
+
+      <p id="status" class="status" role="status"></p>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
