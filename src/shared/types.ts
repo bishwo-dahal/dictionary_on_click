@@ -24,6 +24,10 @@ export interface LookupResult {
   translations: Translation[];
   sourceUrl: string;
   provider: ProviderId;
+  /** IPA or similar, when the provider supplies it. */
+  phonetic?: string;
+  /** MP3 URL (e.g. Free Dictionary API), when available. */
+  audioUrl?: string;
   cachedAt?: number;
   partial?: boolean;
   stale?: boolean;

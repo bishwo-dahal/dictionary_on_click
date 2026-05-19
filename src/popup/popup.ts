@@ -4,11 +4,8 @@ import { isLookupResponse } from "../shared/messages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
 import type { ThemeMode } from "../shared/theme.js";
 import { watchTheme } from "../shared/theme-bind.js";
-import {
-  createPosSpan,
-  createReportIconButton,
-  markReportButtonDone,
-} from "../shared/pos.js";
+import { createHeadwordHeader } from "../shared/headword-header.js";
+import { createPosSpan, markReportButtonDone } from "../shared/pos.js";
 import type { Definition, LookupResult } from "../shared/types.js";
 
 const REPORT_KEY = "brokenWordReports";
@@ -97,20 +94,19 @@ function renderSuccess(result: LookupResult): void {
   const card = document.createElement("div");
   card.className = "result-card";
 
-  const header = document.createElement("div");
-  header.className = "result-header";
-
-  const head = document.createElement("h2");
-  head.className = "result-head";
-  head.textContent = result.word;
-  header.append(head);
-
-  header.append(
-    createReportIconButton((btn) => {
+  const header = createHeadwordHeader({
+    word: result.word,
+    language: result.language,
+    phonetic: result.phonetic,
+    audioUrl: result.audioUrl,
+    headerClass: "result-header",
+    headTag: "h2",
+    headClass: "result-head",
+    onReport: (btn) => {
       void queueReport(result.word, result.language);
       markReportButtonDone(btn);
-    }),
-  );
+    },
+  });
 
   const meta = document.createElement("p");
   meta.className = "result-meta";

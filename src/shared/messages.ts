@@ -35,6 +35,12 @@ export type BackgroundRequest =
   | { type: "recordPopupDismissal" }
   | { type: "getBrokenReports" }
   | { type: "clearBrokenReports" }
+  | {
+      type: "pronounce";
+      word: string;
+      language: DictionaryLanguageId;
+      audioUrl?: string;
+    }
   | { type: "ping" };
 
 export type BackgroundResponse =
@@ -44,6 +50,8 @@ export type BackgroundResponse =
   | { type: "telemetry"; snapshot: TelemetrySnapshot }
   | { type: "providerHealth"; providers: ProviderHealthInfo[] }
   | { type: "brokenReports"; reports: BrokenWordReport[] }
+  | { type: "pronunciationAudio"; buffer: ArrayBuffer; mime: string }
+  | { type: "pronunciationTts" }
   | { type: "ok" }
   | { type: "pong" };
 

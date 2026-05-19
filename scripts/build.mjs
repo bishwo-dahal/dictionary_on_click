@@ -13,6 +13,7 @@ const entryPoints = {
   content: join(root, "src/content/index.ts"),
   "popup/popup": join(root, "src/popup/popup.ts"),
   "options/options": join(root, "src/options/options.ts"),
+  "audio/speak": join(root, "src/audio/speak.ts"),
 };
 
 async function copyStaticAssets() {
@@ -40,6 +41,8 @@ async function copyStaticAssets() {
     readFileSync(join(root, "src/options/options.css"), "utf8") + sharedUiCss;
   writeFileSync(join(dist, "options/options.css"), optionsCss);
   cpSync(join(root, "assets"), join(dist, "assets"), { recursive: true });
+  mkdirSync(join(dist, "audio"), { recursive: true });
+  cpSync(join(root, "src/audio/speak.html"), join(dist, "audio/speak.html"));
 }
 
 const buildOptions = {

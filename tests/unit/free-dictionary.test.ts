@@ -15,6 +15,12 @@ describe("freeDictionaryProvider", () => {
         json: async () => [
           {
             word: "test",
+            phonetics: [
+              {
+                text: "/tɛst/",
+                audio: "https://api.dictionaryapi.dev/media/pronunciations/en/test-us.mp3",
+              },
+            ],
             meanings: [
               {
                 partOfSpeech: "noun",
@@ -35,6 +41,8 @@ describe("freeDictionaryProvider", () => {
     expect(outcome.kind).toBe("hit");
     if (outcome.kind === "hit") {
       expect(outcome.result.definitions[0]?.text).toContain("procedure");
+      expect(outcome.result.phonetic).toBe("/tɛst/");
+      expect(outcome.result.audioUrl).toContain("test-us.mp3");
     }
   });
 });

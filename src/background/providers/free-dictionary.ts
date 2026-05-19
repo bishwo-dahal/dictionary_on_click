@@ -11,10 +11,30 @@ interface FdaMeaning {
   }>;
 }
 
+interface FdaPhonetic {
+  text?: string;
+  audio?: string;
+}
+
 interface FdaEntry {
   word?: string;
+  phonetics?: FdaPhonetic[];
   meanings?: FdaMeaning[];
   sourceUrls?: string[];
+}
+
+function pickPronunciation(entry: FdaEntry): { phonetic?: string; audioUrl?: string } {
+  const phonetics = entry.phonetics ?? [];
+  const withAudio = phonetics.find((p) => p.audio?.trim());
+  const withText = phonetics.find((p) => p.text?.trim());
+  const best = withAudio ?? withText;
+  if (!best) {
+    return {};
+  }
+  return {
+    phonetic: best.text?.trim(),
+    audioUrl: withAudio?.audio?.trim(),
+  };
 }
 
 function isEnglish(language: DictionaryLanguageId): boolean {
@@ -67,6 +87,8 @@ export const freeDictionaryProvider: LookupProvider = {
       return { kind: "miss" };
     }
 
+    const pronunciation = pickPronunciation(entry);
+
     const result: LookupResult = {
       word,
       lemma: entry.word ?? word,
@@ -75,6 +97,7 @@ export const freeDictionaryProvider: LookupProvider = {
       translations: [],
       sourceUrl: entry.sourceUrls?.[0] ?? `https://en.wiktionary.org/wiki/${encodeURIComponent(word)}`,
       provider: "free-dictionary",
+      ...pronunciation,
     };
 
     return { kind: "hit", result };

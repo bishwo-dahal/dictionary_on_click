@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
 import { getProviderHealth } from "./health.js";
+import { resolvePronunciationAudio } from "./pronunciation.js";
 import {
   clearTelemetry,
   getTelemetry,
@@ -124,6 +125,22 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
     case "clearBrokenReports":
       await browser.storage.local.remove(REPORT_KEY);
       return { type: "ok" };
+
+    case "pronounce": {
+      const audio = await resolvePronunciationAudio(
+        message.word,
+        message.language,
+        message.audioUrl,
+      );
+      if (audio) {
+        return {
+          type: "pronunciationAudio",
+          buffer: audio.buffer,
+          mime: audio.mime,
+        };
+      }
+      return { type: "pronunciationTts" };
+    }
 
     case "lookup":
     case "prefetch": {

@@ -1,9 +1,6 @@
 import type { LookupResponse } from "../shared/types.js";
-import {
-  createPosSpan,
-  createReportIconButton,
-  markReportButtonDone,
-} from "../shared/pos.js";
+import { createHeadwordHeader } from "../shared/headword-header.js";
+import { createPosSpan, markReportButtonDone } from "../shared/pos.js";
 import { getSettings } from "./messaging.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
@@ -100,21 +97,21 @@ export class DefinitionBubble {
 
     const { result } = response;
 
-    const header = document.createElement("div");
-    header.className = "card-header";
-    const head = document.createElement("p");
-    head.className = "headword";
-    head.textContent = result.word;
-    header.append(head);
-
-    header.append(
-      createReportIconButton((btn) => {
-        void this.queueReport(result.word, result.language);
-        markReportButtonDone(btn);
+    this.card.append(
+      createHeadwordHeader({
+        word: result.word,
+        language: result.language,
+        phonetic: result.phonetic,
+        audioUrl: result.audioUrl,
+        headerClass: "card-header",
+        headTag: "p",
+        headClass: "headword",
+        onReport: (btn) => {
+          void this.queueReport(result.word, result.language);
+          markReportButtonDone(btn);
+        },
       }),
     );
-
-    this.card.append(header);
 
     for (const def of result.definitions.slice(0, 2)) {
       this.card.append(createGlossLine(def.partOfSpeech, def.text));

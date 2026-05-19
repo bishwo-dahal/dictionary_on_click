@@ -100,15 +100,42 @@ export const POS_AND_ICON_STYLES = `
 
 .card-header, .result-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
 }
 
-.card-header .headword, .result-header .result-head {
+.headword-block {
   flex: 1;
   min-width: 0;
+}
+
+.card-header .headword, .result-header .result-head {
   margin: 0;
+}
+
+.phonetic {
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: color-mix(in srgb, currentColor 55%, transparent);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.icon-btn.speak-btn--active {
+  color: #2563eb;
+  background: color-mix(in srgb, #2563eb 14%, transparent);
+}
+
+[data-theme="dark"] .icon-btn.speak-btn--active {
+  color: #60a5fa;
+  background: color-mix(in srgb, #60a5fa 16%, transparent);
 }
 
 .gloss-line { margin: 0 0 8px; font-size: 13px; line-height: 1.5; }
