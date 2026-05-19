@@ -1,5 +1,4 @@
 :root {
-  color-scheme: light dark;
   font-family: system-ui, sans-serif;
   line-height: 1.5;
 }
@@ -8,6 +7,8 @@ body {
   margin: 0;
   max-width: 42rem;
   padding: 24px;
+  color: var(--fg);
+  background: var(--bg);
 }
 
 .options h1 {
@@ -42,6 +43,10 @@ textarea {
   margin-top: 4px;
   padding: 6px 8px;
   font: inherit;
+  color: var(--fg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 .checkbox {
@@ -71,16 +76,18 @@ textarea {
   padding: 6px 12px;
   cursor: pointer;
   border-radius: 6px;
-  border: 1px solid color-mix(in srgb, canvastext 20%, transparent);
-  background: color-mix(in srgb, canvastext 6%, canvas);
-  color: canvastext;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--fg);
 }
 
 .telemetry-view {
   font-size: 0.75rem;
   padding: 10px;
   border-radius: 8px;
-  background: color-mix(in srgb, canvastext 6%, canvas);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--fg);
   overflow-x: auto;
   max-height: 240px;
 }
@@ -96,7 +103,7 @@ textarea {
 .health-table td {
   text-align: left;
   padding: 6px 8px;
-  border-bottom: 1px solid color-mix(in srgb, canvastext 12%, transparent);
+  border-bottom: 1px solid var(--border);
 }
 
 .status-pill {

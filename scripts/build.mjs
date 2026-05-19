@@ -23,16 +23,22 @@ async function copyStaticAssets() {
   );
   writeFileSync(join(dist, "manifest.json"), JSON.stringify(manifest, null, 2));
 
+  const { SURFACE_THEME_CSS } = await import(
+    pathToFileURL(join(root, "src/shared/surface-theme.css.ts")).href,
+  );
   const { POS_AND_ICON_STYLES } = await import(
     pathToFileURL(join(root, "src/shared/pos-styles.ts")).href,
   );
 
+  const sharedUiCss = SURFACE_THEME_CSS + POS_AND_ICON_STYLES;
+
   cpSync(join(root, "src/popup/index.html"), join(dist, "popup/index.html"));
-  const popupCss =
-    readFileSync(join(root, "src/popup/popup.css"), "utf8") + POS_AND_ICON_STYLES;
+  const popupCss = readFileSync(join(root, "src/popup/popup.css"), "utf8") + sharedUiCss;
   writeFileSync(join(dist, "popup/popup.css"), popupCss);
   cpSync(join(root, "src/options/index.html"), join(dist, "options/index.html"));
-  cpSync(join(root, "src/options/options.css"), join(dist, "options/options.css"));
+  const optionsCss =
+    readFileSync(join(root, "src/options/options.css"), "utf8") + sharedUiCss;
+  writeFileSync(join(dist, "options/options.css"), optionsCss);
   cpSync(join(root, "assets"), join(dist, "assets"), { recursive: true });
 }
 

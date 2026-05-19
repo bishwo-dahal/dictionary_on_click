@@ -24,12 +24,30 @@ export const POS_AND_ICON_STYLES = `
 .pos--conjunction, .pos--conj { color: #be185d; background: #fce7f3; }
 .pos--interjection, .pos--intj { color: #b45309; background: #fef3c7; }
 
-@media (prefers-color-scheme: dark) {
-  .pos { color: #93c5fd; background: #1e3a8a; }
-  .pos--noun, .pos--n { color: #93c5fd; background: #1e3a5f; }
-  .pos--verb, .pos--v { color: #86efac; background: #14532d; }
-  .pos--adjective, .pos--adj, .pos--a { color: #d8b4fe; background: #581c87; }
-  .pos--adverb, .pos--adv { color: #fdba74; background: #7c2d12; }
+[data-theme="dark"] .pos {
+  color: #93c5fd;
+  background: #1e3a8a;
+}
+[data-theme="dark"] .pos--noun,
+[data-theme="dark"] .pos--n {
+  color: #93c5fd;
+  background: #1e3a5f;
+}
+[data-theme="dark"] .pos--verb,
+[data-theme="dark"] .pos--v {
+  color: #86efac;
+  background: #14532d;
+}
+[data-theme="dark"] .pos--adjective,
+[data-theme="dark"] .pos--adj,
+[data-theme="dark"] .pos--a {
+  color: #d8b4fe;
+  background: #581c87;
+}
+[data-theme="dark"] .pos--adverb,
+[data-theme="dark"] .pos--adv {
+  color: #fdba74;
+  background: #7c2d12;
 }
 
 .icon-btn {
@@ -75,11 +93,9 @@ export const POS_AND_ICON_STYLES = `
   background: color-mix(in srgb, #16a34a 12%, transparent);
 }
 
-@media (prefers-color-scheme: dark) {
-  .icon-btn.report-btn--done {
-    color: #4ade80;
-    background: color-mix(in srgb, #4ade80 14%, transparent);
-  }
+[data-theme="dark"] .icon-btn.report-btn--done {
+  color: #4ade80;
+  background: color-mix(in srgb, #4ade80 14%, transparent);
 }
 
 .card-header, .result-header {

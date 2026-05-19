@@ -1,3 +1,4 @@
+import { BUBBLE_THEME_CSS } from "./bubble-theme.css.js";
 import { POS_AND_ICON_STYLES } from "../shared/pos-styles.js";
 
 export const BUBBLE_STYLES = `
@@ -6,7 +7,6 @@ export const BUBBLE_STYLES = `
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.45;
-  color-scheme: light dark;
 }
 
 .card {
@@ -15,10 +15,17 @@ export const BUBBLE_STYLES = `
   min-width: 380px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, canvastext 18%, transparent);
-  background: canvas;
-  color: canvastext;
-  box-shadow: 0 8px 28px color-mix(in srgb, canvastext 22%, transparent);
+  --bubble-bg: #ffffff;
+  --bubble-fg: #0f172a;
+  --bubble-border: #e2e8f0;
+  --bubble-muted: #64748b;
+  --bubble-btn-bg: #f1f5f9;
+  --bubble-btn-border: #cbd5e1;
+  --bubble-shadow: rgb(15 23 42 / 0.18);
+  border: 1px solid var(--bubble-border);
+  background: var(--bubble-bg);
+  color: var(--bubble-fg);
+  box-shadow: 0 8px 28px var(--bubble-shadow);
   pointer-events: auto;
 }
 
@@ -41,13 +48,13 @@ export const BUBBLE_STYLES = `
 .meta {
   margin: 0 0 10px;
   font-size: 11px;
-  opacity: 0.65;
+  color: var(--bubble-muted);
 }
 
 .status {
   margin: 0;
   font-size: 13px;
-  opacity: 0.75;
+  color: var(--bubble-muted);
 }
 
 .status--error {
@@ -69,9 +76,9 @@ a.btn {
   border-radius: 6px;
   padding: 5px 10px;
   text-decoration: none;
-  border: 1px solid color-mix(in srgb, canvastext 20%, transparent);
-  background: color-mix(in srgb, canvastext 6%, canvas);
-  color: canvastext;
+  border: 1px solid var(--bubble-btn-border);
+  background: var(--bubble-btn-bg);
+  color: var(--bubble-fg);
 }
 
 .actions button.primary,
@@ -92,9 +99,9 @@ a.btn:hover {
   border-radius: 4px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, canvastext 10%, transparent) 25%,
-    color-mix(in srgb, canvastext 18%, transparent) 50%,
-    color-mix(in srgb, canvastext 10%, transparent) 75%
+    color-mix(in srgb, var(--bubble-fg) 10%, transparent) 25%,
+    color-mix(in srgb, var(--bubble-fg) 18%, transparent) 50%,
+    color-mix(in srgb, var(--bubble-fg) 10%, transparent) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
@@ -104,5 +111,6 @@ a.btn:hover {
   0% { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
+${BUBBLE_THEME_CSS}
 ${POS_AND_ICON_STYLES}
 `;

@@ -4,8 +4,11 @@ import { LANGUAGES } from "../shared/languages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
 import type { ProviderHealthInfo, TelemetrySnapshot } from "../shared/telemetry-types.js";
+import type { ThemeMode } from "../shared/theme.js";
+import { watchTheme } from "../shared/theme-bind.js";
 import type { UserSettings } from "../shared/types.js";
 
+const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
 const dictSelect = document.getElementById(
   "dictionary-language",
 ) as HTMLSelectElement;
@@ -138,15 +141,22 @@ async function refreshReportsCount(): Promise<void> {
 }
 
 async function init(): Promise<void> {
+  watchTheme(document.documentElement, async () => (await load()).theme);
+
   fillSelect(dictSelect);
   fillSelect(targetSelect);
 
   const settings = await load();
+  themeSelect.value = settings.theme;
   dictSelect.value = settings.dictionaryLanguage;
   targetSelect.value = settings.targetLanguage;
   saveHistoryCheck.checked = settings.saveHistory;
   allowExternalCheck.checked = settings.allowExternalHistory;
   allowedIdsInput.value = settings.allowedExtensionIds.join("\n");
+
+  themeSelect.addEventListener("change", () => {
+    void save({ theme: themeSelect.value as ThemeMode });
+  });
 
   dictSelect.addEventListener("change", () => {
     void save({ dictionaryLanguage: dictSelect.value as DictionaryLanguageId });

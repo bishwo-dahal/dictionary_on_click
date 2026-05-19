@@ -1,5 +1,6 @@
 import type { DictionaryLanguageId, ProviderId } from "./languages.js";
 import type { LookupErrorCode } from "./errors.js";
+import type { ThemeMode } from "./theme.js";
 
 /** A single sense or gloss line. */
 export interface Definition {
@@ -48,6 +49,7 @@ export type LookupResponse = LookupSuccess | LookupFailure;
 export interface UserSettings {
   dictionaryLanguage: DictionaryLanguageId;
   targetLanguage: DictionaryLanguageId;
+  theme: ThemeMode;
   saveHistory: boolean;
   allowExternalHistory: boolean;
   allowedExtensionIds: string[];
@@ -56,6 +58,7 @@ export interface UserSettings {
 export const DEFAULT_SETTINGS: UserSettings = {
   dictionaryLanguage: "en-us",
   targetLanguage: "en-us",
+  theme: "system",
   saveHistory: false,
   allowExternalHistory: false,
   allowedExtensionIds: [],

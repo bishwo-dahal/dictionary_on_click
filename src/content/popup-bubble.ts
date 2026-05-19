@@ -4,6 +4,8 @@ import {
   createReportIconButton,
   markReportButtonDone,
 } from "../shared/pos.js";
+import { getSettings } from "./messaging.js";
+import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
 
 const FAILSAFE_MS = 15_000;
@@ -43,6 +45,7 @@ export class DefinitionBubble {
   private card: HTMLDivElement | null = null;
   private failsafeTimer: number | null = null;
   private onDismiss: (() => void) | null = null;
+  private themeBound = false;
 
   showLoading(word: string, anchor: BubbleAnchor): void {
     this.mount(anchor);
@@ -150,6 +153,7 @@ export class DefinitionBubble {
     this.host = null;
     this.shadow = null;
     this.card = null;
+    this.themeBound = false;
     this.onDismiss?.();
     this.onDismiss = null;
   }
@@ -184,10 +188,19 @@ export class DefinitionBubble {
       this.card.style.pointerEvents = "auto";
       this.shadow.append(this.card);
       document.documentElement.append(this.host);
+      this.bindCardTheme();
     }
 
     this.reposition(anchor);
     this.resetFailsafe();
+  }
+
+  private bindCardTheme(): void {
+    if (this.themeBound || !this.card) {
+      return;
+    }
+    this.themeBound = true;
+    watchTheme(this.card, async () => (await getSettings()).theme);
   }
 
   private reposition(anchor: BubbleAnchor): void {

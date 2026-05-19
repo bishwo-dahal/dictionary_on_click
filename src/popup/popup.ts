@@ -2,6 +2,8 @@ import { LANGUAGES, getLanguageLabel } from "../shared/languages.js";
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
 import { isLookupResponse } from "../shared/messages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
+import type { ThemeMode } from "../shared/theme.js";
+import { watchTheme } from "../shared/theme-bind.js";
 import {
   createPosSpan,
   createReportIconButton,
@@ -18,6 +20,7 @@ const languageSelect = document.getElementById(
 ) as HTMLSelectElement;
 const resultEl = document.getElementById("result") as HTMLDivElement;
 const openOptions = document.getElementById("open-options") as HTMLAnchorElement;
+const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
 
 function populateLanguages(): void {
   for (const lang of LANGUAGES) {
@@ -195,10 +198,18 @@ async function runLookup(): Promise<void> {
 
 async function init(): Promise<void> {
   populateLanguages();
+  watchTheme(document.documentElement, async () => {
+    const res = await send({ type: "getSettings" });
+    if (res.type !== "settings") {
+      return "system";
+    }
+    return res.settings.theme;
+  });
 
   const response = await send({ type: "getSettings" });
   if (response.type === "settings") {
     languageSelect.value = response.settings.dictionaryLanguage;
+    themeSelect.value = response.settings.theme;
   }
 
   form.addEventListener("submit", (e) => {
@@ -212,6 +223,13 @@ async function init(): Promise<void> {
       settings: {
         dictionaryLanguage: languageSelect.value as DictionaryLanguageId,
       },
+    });
+  });
+
+  themeSelect.addEventListener("change", () => {
+    void send({
+      type: "saveSettings",
+      settings: { theme: themeSelect.value as ThemeMode },
     });
   });
 
