@@ -4,11 +4,13 @@ import type { LookupResult } from "../../shared/types.js";
 
 export type ProviderOutcome =
   | { kind: "hit"; result: LookupResult }
+  | { kind: "stale"; result: LookupResult }
   | { kind: "miss" }
   | {
       kind: "error";
       code: LookupErrorCode;
       retryable: boolean;
+      retryAfterSec?: number;
     };
 
 export interface LookupProvider {

@@ -7,8 +7,12 @@ import {
 } from "../shared/errors.js";
 import type { LookupFailure, LookupResponse, LookupResult } from "../shared/types.js";
 import { generateVariants, normalizeInput } from "./normalize.js";
-import { createDefaultProviders } from "./providers/stubs.js";
-import type { LookupProvider, ProviderOutcome } from "./providers/types.js";
+import {
+  createDefaultProviders,
+  datamuseSpellSuggest,
+  saveToCache,
+} from "./providers/index.js";
+import type { LookupProvider } from "./providers/types.js";
 import {
   backoffDelayMs,
   isBackoffError,
@@ -129,8 +133,14 @@ export class LookupOrchestrator {
     const budgetTimer = setTimeout(() => session.abort.abort(), TOTAL_LOOKUP_BUDGET_MS);
 
     try {
-      const variants = generateVariants(normalized);
+      const variants = [...generateVariants(normalized)];
+      const spell = await datamuseSpellSuggest(normalized, req.language, signal);
+      if (spell && !variants.includes(spell)) {
+        variants.push(spell);
+      }
+
       const errors: LookupErrorCode[] = [];
+      let staleHit: LookupResult | null = null;
 
       for (const variant of variants) {
         if (this.isStale(req)) {
@@ -149,7 +159,15 @@ export class LookupOrchestrator {
           const outcome = await this.queryProvider(provider, variant, req.language, signal);
 
           if (outcome.kind === "hit") {
+            if (provider.id !== "cache") {
+              void saveToCache(outcome.result);
+            }
             return { ok: true, result: outcome.result };
+          }
+
+          if (outcome.kind === "stale") {
+            staleHit = outcome.result;
+            continue;
           }
 
           if (outcome.kind === "error") {
@@ -159,6 +177,13 @@ export class LookupOrchestrator {
             }
           }
         }
+      }
+
+      if (staleHit) {
+        return {
+          ok: true,
+          result: { ...staleHit, partial: true, stale: true },
+        };
       }
 
       if (isOffline() && errors.length === 0) {
@@ -194,6 +219,7 @@ export class LookupOrchestrator {
     signal: AbortSignal,
   ): Promise<
     | { kind: "hit"; result: LookupResult }
+    | { kind: "stale"; result: LookupResult }
     | { kind: "error"; code: LookupErrorCode }
     | { kind: "miss" }
   > {
@@ -211,7 +237,7 @@ export class LookupOrchestrator {
           signal,
         );
 
-        if (outcome.kind === "hit") {
+        if (outcome.kind === "hit" || outcome.kind === "stale") {
           return outcome;
         }
 
@@ -225,7 +251,7 @@ export class LookupOrchestrator {
           return { kind: "error", code: outcome.code };
         }
 
-        await sleep(backoffDelayMs(attempt), signal);
+        await sleep(backoffDelayMs(attempt, outcome.retryAfterSec), signal);
       } catch (err) {
         if (signal.aborted || (err instanceof DOMException && err.name === "AbortError")) {
           return { kind: "error", code: "TIMEOUT" };

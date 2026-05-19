@@ -4,7 +4,7 @@ Firefox extension: double-click any word for a definition bubble, or use the too
 
 ## Status
 
-**v0.1.0** — scaffold + lookup orchestrator (normalization, variants, retries, cancellation). Dictionary providers and UI flows are next.
+**v0.1.0** — scaffold, lookup orchestrator, and dictionary providers (Wiktionary, Free Dictionary API, Datamuse, IndexedDB cache). Double-click bubble UI is next.
 
 ## Requirements
 
