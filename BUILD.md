@@ -29,14 +29,14 @@ Supported environments: Linux, macOS, Windows (with the above tools in `PATH`).
 |---------|-----------------|--------|
 | [Node.js](https://nodejs.org/) | **20.x** | https://nodejs.org/ or your package manager (`dnf install nodejs`, `brew install node`, etc.) |
 | npm | **10.x** (comes with Node 20+) | Included with Node.js |
-| [ImageMagick](https://imagemagick.org/) | **7.x** | Linux: `sudo dnf install ImageMagick` / `sudo apt install imagemagick` — macOS: `brew install imagemagick` — Windows: https://imagemagick.org/script/download.php |
+| [ImageMagick](https://imagemagick.org/) | **7.x** (optional) | Only needed when changing `assets/icons/icon.svg`. CI and normal builds use the committed `icon-*.png` files if `magick` is not installed. |
 
 Verify installations:
 
 ```bash
 node --version    # v20.x.x or higher
 npm --version     # 10.x.x or higher
-magick --version  # ImageMagick 7.x
+magick --version  # optional — ImageMagick 7.x, for icon regeneration only
 ```
 
 ## Step-by-step build (exact copy of the add-on)
