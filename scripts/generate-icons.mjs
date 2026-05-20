@@ -20,23 +20,28 @@ function outputs() {
   return sizes.map((size) => join(root, `assets/icons/icon-${size}.png`));
 }
 
+function iconsPresent() {
+  return outputs().every((out) => existsSync(out));
+}
+
+/** True when PNGs exist and are at least as new as icon.svg (local dev only). */
 function iconsUpToDate() {
-  if (!existsSync(svg)) {
+  if (!existsSync(svg) || !iconsPresent()) {
     return false;
   }
   const svgMtime = statSync(svg).mtimeMs;
-  return outputs().every((out) => existsSync(out) && statSync(out).mtimeMs >= svgMtime);
+  return outputs().every((out) => statSync(out).mtimeMs >= svgMtime);
 }
 
 if (!magickAvailable()) {
-  if (iconsUpToDate()) {
+  if (iconsPresent()) {
     console.log("magick not found; using committed PNG icons in assets/icons/");
     process.exit(0);
   }
   console.error(
     "magick (ImageMagick 7) is required to generate icons.\n" +
       "Install it (e.g. dnf install ImageMagick / apt install imagemagick),\n" +
-      "or ensure assets/icons/icon-{48,96,128}.png exist and are up to date.",
+      "or commit assets/icons/icon-48.png, icon-96.png, and icon-128.png.",
   );
   process.exit(1);
 }
