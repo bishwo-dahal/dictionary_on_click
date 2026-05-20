@@ -1,8 +1,6 @@
 import type { BackgroundRequest, BackgroundResponse } from "./messages.js";
 import type { DictionaryLanguageId } from "./languages.js";
-import { SPEAK_ICON_SVG } from "./ui-icons.js";
-
-export { SPEAK_ICON_SVG } from "./ui-icons.js";
+import { createSpeakIcon } from "./ui-icons.js";
 
 const SPEECH_LANG: Record<DictionaryLanguageId, string> = {
   ar: "ar-SA",
@@ -138,7 +136,7 @@ export function createSpeakButton(
   btn.className = "icon-btn speak-btn";
   btn.title = "Listen to pronunciation";
   btn.setAttribute("aria-label", `Pronounce ${word}`);
-  btn.innerHTML = SPEAK_ICON_SVG;
+  btn.append(createSpeakIcon());
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     btn.classList.add("speak-btn--active");

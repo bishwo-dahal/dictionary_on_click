@@ -8,18 +8,14 @@ export function posClassName(partOfSpeech: string): string {
   return key ? `pos pos--${key}` : "pos";
 }
 
-import { REPORT_ICON_SVG } from "./ui-icons.js";
-
-export { REPORT_ICON_SVG } from "./ui-icons.js";
-
-const REPORT_DONE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+import { createReportIcon, createReportDoneIcon } from "./ui-icons.ts";
 
 export function markReportButtonDone(btn: HTMLButtonElement): void {
   btn.classList.add("report-btn--done");
   btn.disabled = true;
   btn.title = "Reported — thank you";
   btn.setAttribute("aria-label", "Reported — thank you");
-  btn.innerHTML = REPORT_DONE_SVG;
+  btn.replaceChildren(createReportDoneIcon());
 }
 
 export function createReportIconButton(
@@ -30,7 +26,7 @@ export function createReportIconButton(
   btn.className = "icon-btn report-btn";
   btn.title = "Report broken word";
   btn.setAttribute("aria-label", "Report broken word");
-  btn.innerHTML = REPORT_ICON_SVG;
+  btn.append(createReportIcon());
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     onReport(btn);
