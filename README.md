@@ -2,6 +2,8 @@
 
 Firefox extension: double-click any word for a definition bubble, or use the toolbar dictionary for full entries. Built for reliability with free, keyless APIs (Wiktionary, Free Dictionary API, Datamuse).
 
+Try it at: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/dictionary-on-click/)
+
 ## Status
 
 **v0.1.1** — feature-complete MVP: double-click bubble, toolbar dictionary, provider health circuit breakers, options (history, telemetry, reports), and multi-provider lookups with IndexedDB cache.
