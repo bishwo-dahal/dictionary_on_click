@@ -131,4 +131,26 @@ describe("pickBubbleSummary", () => {
     expect(shown.map((d) => normalizePos(d.partOfSpeech))).toEqual(["verb", "noun"]);
     expect(hiddenCount).toBe(2);
   });
+
+  it("takes up to maxPerPos from each POS when set above 1", () => {
+    const { shown, hiddenCount } = pickBubbleSummary(churnLike, {
+      maxTotal: 4,
+      maxPerPos: 2,
+    });
+
+    expect(shown.map((d) => normalizePos(d.partOfSpeech))).toEqual([
+      "verb",
+      "verb",
+      "noun",
+      "noun",
+    ]);
+    expect(hiddenCount).toBe(0);
+  });
+
+  it("still caps per-POS picks at maxTotal", () => {
+    const { shown } = pickBubbleSummary(churnLike, { maxTotal: 3, maxPerPos: 2 });
+    expect(shown).toHaveLength(3);
+    expect(shown.filter((d) => normalizePos(d.partOfSpeech) === "verb")).toHaveLength(2);
+    expect(shown.filter((d) => normalizePos(d.partOfSpeech) === "noun")).toHaveLength(1);
+  });
 });

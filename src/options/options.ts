@@ -6,7 +6,7 @@ import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.j
 import type { ProviderHealthInfo, TelemetrySnapshot } from "../shared/telemetry-types.js";
 import type { ThemeMode } from "../shared/theme.js";
 import { watchTheme } from "../shared/theme-bind.js";
-import type { UserSettings, BubblePreviewMax } from "../shared/types.js";
+import type { UserSettings, BubblePreviewMax, BubblePreviewPerPos } from "../shared/types.js";
 
 const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
 const dictSelect = document.getElementById(
@@ -17,6 +17,9 @@ const targetSelect = document.getElementById(
 ) as HTMLSelectElement;
 const bubblePreviewMaxSelect = document.getElementById(
   "bubble-preview-max",
+) as HTMLSelectElement;
+const bubblePreviewPerPosSelect = document.getElementById(
+  "bubble-preview-per-pos",
 ) as HTMLSelectElement;
 const saveHistoryCheck = document.getElementById(
   "save-history",
@@ -154,6 +157,7 @@ async function init(): Promise<void> {
   dictSelect.value = settings.dictionaryLanguage;
   targetSelect.value = settings.targetLanguage;
   bubblePreviewMaxSelect.value = String(settings.bubblePreviewMax);
+  bubblePreviewPerPosSelect.value = String(settings.bubblePreviewPerPos);
   saveHistoryCheck.checked = settings.saveHistory;
   allowExternalCheck.checked = settings.allowExternalHistory;
   allowedIdsInput.value = settings.allowedExtensionIds.join("\n");
@@ -172,6 +176,12 @@ async function init(): Promise<void> {
   bubblePreviewMaxSelect.addEventListener("change", () => {
     void save({
       bubblePreviewMax: Number(bubblePreviewMaxSelect.value) as BubblePreviewMax,
+    });
+  });
+
+  bubblePreviewPerPosSelect.addEventListener("change", () => {
+    void save({
+      bubblePreviewPerPos: Number(bubblePreviewPerPosSelect.value) as BubblePreviewPerPos,
     });
   });
 

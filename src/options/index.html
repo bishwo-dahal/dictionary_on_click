@@ -50,9 +50,18 @@
             <option value="5">Maximum (5)</option>
           </select>
         </label>
+        <label>
+          Meanings per part of speech
+          <select id="bubble-preview-per-pos">
+            <option value="1">One each (1)</option>
+            <option value="2">Up to two each (2)</option>
+            <option value="3">Up to three each (3)</option>
+          </select>
+        </label>
         <p class="hint">
-          How many meanings to show before “+ more meanings”. Different parts of speech are
-          preferred when possible.
+          How many meanings to show before “+ more meanings”. When a word has multiple parts of
+          speech, the bubble prefers a mix across them (verb, noun, etc.), up to the per-POS
+          limit and the total above.
         </p>
       </section>
 

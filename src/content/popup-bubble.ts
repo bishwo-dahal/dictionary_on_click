@@ -142,7 +142,14 @@ export class DefinitionBubble {
       }),
     );
 
-    this.card.append(this.buildMeaningsRegion(result, settings.bubblePreviewMax, anchor));
+    this.card.append(
+      this.buildMeaningsRegion(
+        result,
+        settings.bubblePreviewMax,
+        settings.bubblePreviewPerPos,
+        anchor,
+      ),
+    );
 
     if (result.partial || result.stale) {
       const meta = document.createElement("p");
@@ -171,6 +178,7 @@ export class DefinitionBubble {
   private buildMeaningsRegion(
     result: LookupResult,
     previewMax: number,
+    previewPerPos: number,
     anchor: BubbleAnchor,
   ): HTMLDivElement {
     const region = document.createElement("div");
@@ -182,6 +190,7 @@ export class DefinitionBubble {
 
     const { shown, hiddenCount } = pickBubbleSummary(result.definitions, {
       maxTotal: previewMax,
+      maxPerPos: previewPerPos,
     });
     const list = createGlossList({ expandable: this.meaningsExpanded });
 
@@ -201,7 +210,9 @@ export class DefinitionBubble {
           this.meaningsExpanded = !this.meaningsExpanded;
           this.card
             ?.querySelector(".meanings-region")
-            ?.replaceWith(this.buildMeaningsRegion(result, previewMax, anchor));
+            ?.replaceWith(
+              this.buildMeaningsRegion(result, previewMax, previewPerPos, anchor),
+            );
           requestAnimationFrame(() => this.reposition(anchor));
         }),
       );
