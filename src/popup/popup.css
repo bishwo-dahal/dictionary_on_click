@@ -221,6 +221,33 @@ body {
   word-wrap: break-word;
 }
 
+.pos-group {
+  margin: 0;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.pos-group:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.pos-group-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pos-group-list .def-item {
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.pos-group-list .def-item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
 .result-empty {
   margin: 0;
   color: var(--fg-muted);

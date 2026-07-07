@@ -141,6 +141,43 @@ export const POS_AND_ICON_STYLES = `
 .gloss-line { margin: 0 0 8px; font-size: 13px; line-height: 1.5; }
 .gloss-line:last-of-type { margin-bottom: 10px; }
 .gloss-text { display: inline; }
+.gloss-text--clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.gloss-list {
+  margin: 0 0 10px;
+}
+
+.gloss-list--expandable {
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.pos-group {
+  margin: 0 0 10px;
+}
+
+.pos-group:last-child {
+  margin-bottom: 10px;
+}
+
+.pos-group--flat .gloss-line:last-of-type {
+  margin-bottom: 8px;
+}
+
+.pos-group-head {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, currentColor 55%, transparent);
+}
 
 .def-item .pos {
   display: block;

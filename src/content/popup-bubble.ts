@@ -1,6 +1,7 @@
 import type { LookupResponse } from "../shared/types.js";
 import { createHeadwordHeader } from "../shared/headword-header.js";
-import { createPosSpan, markReportButtonDone } from "../shared/pos.js";
+import { markReportButtonDone } from "../shared/pos.js";
+import { createGlossLine } from "../shared/render-definitions.js";
 import { getSettings } from "./messaging.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
@@ -18,22 +19,6 @@ interface ReportEntry {
   word: string;
   language: string;
   pageUrl: string;
-}
-
-function createGlossLine(partOfSpeech: string | undefined, text: string): HTMLParagraphElement {
-  const line = document.createElement("p");
-  line.className = "gloss-line";
-
-  if (partOfSpeech) {
-    line.append(createPosSpan(partOfSpeech));
-  }
-
-  const span = document.createElement("span");
-  span.className = "gloss-text";
-  span.textContent = text;
-  line.append(span);
-
-  return line;
 }
 
 export class DefinitionBubble {
