@@ -1,4 +1,4 @@
-/** POS badges + icon buttons (bubble shadow DOM + appended to popup.css at build). */
+/** Part-of-speech (POS) badges + icon buttons (bubble shadow DOM + appended to popup.css at build). */
 export const POS_AND_ICON_STYLES = `
 .pos {
   display: inline-block;
@@ -138,14 +138,66 @@ export const POS_AND_ICON_STYLES = `
   background: color-mix(in srgb, #60a5fa 16%, transparent);
 }
 
-.gloss-line { margin: 0 0 8px; font-size: 13px; line-height: 1.5; }
+.gloss-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
 .gloss-line:last-of-type { margin-bottom: 10px; }
-.gloss-text { display: inline; }
+.gloss-line .pos {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+.gloss-text {
+  flex: 1;
+  min-width: 0;
+}
+.gloss-text--clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.gloss-list {
+  margin: 0 0 10px;
+}
+
+.gloss-list--expandable {
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.pos-group {
+  margin: 0 0 10px;
+}
+
+.pos-group:last-child {
+  margin-bottom: 10px;
+}
+
+.pos-group--flat .gloss-line:last-of-type {
+  margin-bottom: 8px;
+}
+
+.pos-group-head {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, currentColor 55%, transparent);
+}
 
 .def-item .pos {
-  display: block;
-  margin-right: 0;
-  margin-bottom: 4px;
+  display: inline-block;
+  margin-right: 6px;
+  margin-bottom: 0;
+  vertical-align: baseline;
 }
 
 .card-header .headword { margin: 0; }

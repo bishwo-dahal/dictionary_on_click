@@ -1,6 +1,13 @@
-import type { LookupResponse } from "../shared/types.js";
+import type { LookupResponse, LookupResult } from "../shared/types.js";
+import { groupDefinitionsByPos, pickBubbleSummary } from "../shared/definition-display.js";
 import { createHeadwordHeader } from "../shared/headword-header.js";
-import { createPosSpan, markReportButtonDone } from "../shared/pos.js";
+import { markReportButtonDone } from "../shared/pos.js";
+import {
+  appendGlossLines,
+  createExpandMeaningsToggle,
+  createGlossList,
+  createPosGroup,
+} from "../shared/render-definitions.js";
 import { getSettings } from "./messaging.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
@@ -20,22 +27,6 @@ interface ReportEntry {
   pageUrl: string;
 }
 
-function createGlossLine(partOfSpeech: string | undefined, text: string): HTMLParagraphElement {
-  const line = document.createElement("p");
-  line.className = "gloss-line";
-
-  if (partOfSpeech) {
-    line.append(createPosSpan(partOfSpeech));
-  }
-
-  const span = document.createElement("span");
-  span.className = "gloss-text";
-  span.textContent = text;
-  line.append(span);
-
-  return line;
-}
-
 export class DefinitionBubble {
   private host: HTMLDivElement | null = null;
   private shadow: ShadowRoot | null = null;
@@ -43,8 +34,10 @@ export class DefinitionBubble {
   private failsafeTimer: number | null = null;
   private onDismiss: (() => void) | null = null;
   private themeBound = false;
+  private meaningsExpanded = false;
 
   showLoading(word: string, anchor: BubbleAnchor): void {
+    this.meaningsExpanded = false;
     this.mount(anchor);
     if (!this.card) {
       return;
@@ -77,7 +70,42 @@ export class DefinitionBubble {
       return;
     }
 
+    void this.populateResult(response, anchor);
+  }
+
+  dismiss(): void {
+    if (this.failsafeTimer !== null) {
+      window.clearTimeout(this.failsafeTimer);
+      this.failsafeTimer = null;
+    }
+    this.host?.remove();
+    this.host = null;
+    this.shadow = null;
+    this.card = null;
+    this.themeBound = false;
+    this.meaningsExpanded = false;
+    this.onDismiss?.();
+    this.onDismiss = null;
+  }
+
+  isVisible(): boolean {
+    return this.host !== null;
+  }
+
+  bindLifecycle(onDismiss: () => void): void {
+    this.onDismiss = onDismiss;
+  }
+
+  private async populateResult(
+    response: LookupResponse,
+    anchor: BubbleAnchor,
+  ): Promise<void> {
+    if (!this.card) {
+      return;
+    }
+
     this.card.replaceChildren();
+    this.meaningsExpanded = false;
 
     if (!response.ok) {
       const header = document.createElement("div");
@@ -96,6 +124,7 @@ export class DefinitionBubble {
     }
 
     const { result } = response;
+    const settings = await getSettings();
 
     this.card.append(
       createHeadwordHeader({
@@ -113,9 +142,14 @@ export class DefinitionBubble {
       }),
     );
 
-    for (const def of result.definitions.slice(0, 2)) {
-      this.card.append(createGlossLine(def.partOfSpeech, def.text));
-    }
+    this.card.append(
+      this.buildMeaningsRegion(
+        result,
+        settings.bubblePreviewMax,
+        settings.bubblePreviewPerPos,
+        anchor,
+      ),
+    );
 
     if (result.partial || result.stale) {
       const meta = document.createElement("p");
@@ -141,26 +175,50 @@ export class DefinitionBubble {
     this.reposition(anchor);
   }
 
-  dismiss(): void {
-    if (this.failsafeTimer !== null) {
-      window.clearTimeout(this.failsafeTimer);
-      this.failsafeTimer = null;
+  private buildMeaningsRegion(
+    result: LookupResult,
+    previewMax: number,
+    previewPerPos: number,
+    anchor: BubbleAnchor,
+  ): HTMLDivElement {
+    const region = document.createElement("div");
+    region.className = "meanings-region";
+
+    if (result.definitions.length === 0) {
+      return region;
     }
-    this.host?.remove();
-    this.host = null;
-    this.shadow = null;
-    this.card = null;
-    this.themeBound = false;
-    this.onDismiss?.();
-    this.onDismiss = null;
-  }
 
-  isVisible(): boolean {
-    return this.host !== null;
-  }
+    const { shown, hiddenCount } = pickBubbleSummary(result.definitions, {
+      maxTotal: previewMax,
+      maxPerPos: previewPerPos,
+    });
+    const list = createGlossList({ expandable: this.meaningsExpanded });
 
-  bindLifecycle(onDismiss: () => void): void {
-    this.onDismiss = onDismiss;
+    if (this.meaningsExpanded) {
+      for (const group of groupDefinitionsByPos(result.definitions)) {
+        list.append(createPosGroup(group, { variant: "bubble" }));
+      }
+    } else {
+      appendGlossLines(list, shown, { clamp: true });
+    }
+
+    region.append(list);
+
+    if (hiddenCount > 0 || this.meaningsExpanded) {
+      region.append(
+        createExpandMeaningsToggle(hiddenCount, this.meaningsExpanded, () => {
+          this.meaningsExpanded = !this.meaningsExpanded;
+          this.card
+            ?.querySelector(".meanings-region")
+            ?.replaceWith(
+              this.buildMeaningsRegion(result, previewMax, previewPerPos, anchor),
+            );
+          requestAnimationFrame(() => this.reposition(anchor));
+        }),
+      );
+    }
+
+    return region;
   }
 
   private mount(anchor: BubbleAnchor): void {

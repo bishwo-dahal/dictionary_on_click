@@ -202,6 +202,10 @@ body {
   list-style: none;
 }
 
+.definitions-body {
+  margin: 0;
+}
+
 .def-item {
   margin: 0;
   padding: 10px 0;
@@ -213,12 +217,49 @@ body {
   border-top: none;
 }
 
+.def-item .gloss-line {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.def-item .gloss-line:last-of-type {
+  margin-bottom: 0;
+}
+
 .def-text {
   margin: 0;
   font-size: 14px;
   line-height: 1.55;
   color: var(--fg);
   word-wrap: break-word;
+}
+
+.pos-group {
+  margin: 0;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.pos-group:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.pos-group-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pos-group-list .def-item {
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.pos-group-list .def-item:first-child {
+  padding-top: 0;
+  border-top: none;
 }
 
 .result-empty {

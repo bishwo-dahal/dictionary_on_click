@@ -1,4 +1,4 @@
-/** Normalize POS string for CSS class, e.g. "Noun" → "noun". */
+/** Normalize part-of-speech (POS) string for CSS class, e.g. "Noun" → "noun". */
 export function posClassName(partOfSpeech: string): string {
   const key = partOfSpeech
     .toLowerCase()

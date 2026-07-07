@@ -93,6 +93,24 @@ a.btn:hover {
   filter: brightness(1.05);
 }
 
+.expand-meanings-btn {
+  display: block;
+  margin: 0 0 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.expand-meanings-btn:hover {
+  filter: brightness(1.08);
+}
+
 .skeleton {
   height: 12px;
   margin: 6px 0;
