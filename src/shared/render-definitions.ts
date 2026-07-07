@@ -61,7 +61,7 @@ export function appendGlossLines(
 
 /**
  * Render a part-of-speech (POS) group — expanded bubble or grouped popup.
- * When `showHeader` is true, gloss lines omit per-line POS badges (header shows POS).
+ * Each meaning line includes the colored POS pill when `partOfSpeech` is set.
  */
 export function createPosGroup(
   group: PosGroup,
@@ -82,21 +82,21 @@ export function createPosGroup(
     const list = document.createElement("ol");
     list.className = "pos-group-list";
     for (const def of group.items) {
-      list.append(createDefinitionListItem(def, { showPos: !showHeader }));
+      const pos = def.partOfSpeech ?? (group.pos !== "other" ? group.label : undefined);
+      list.append(createDefinitionListItem({ ...def, partOfSpeech: pos }, { showPos: true }));
     }
     container.append(list);
     return container;
   }
 
   for (const def of group.items) {
-    container.append(
-      createGlossLine(showHeader ? undefined : def.partOfSpeech, def.text, { clamp }),
-    );
+    const pos = def.partOfSpeech ?? (group.pos !== "other" ? group.label : undefined);
+    container.append(createGlossLine(pos, def.text, { clamp }));
   }
   return container;
 }
 
-/** Single meaning row for the toolbar popup list. */
+/** Single meaning row for the toolbar popup list (same inline pill + text as the bubble). */
 export function createDefinitionListItem(
   def: Definition,
   options: DefinitionListItemOptions = {},
@@ -105,14 +105,8 @@ export function createDefinitionListItem(
   const li = document.createElement("li");
   li.className = "def-item";
 
-  if (showPos && def.partOfSpeech) {
-    li.append(createPosSpan(def.partOfSpeech));
-  }
-
-  const text = document.createElement("p");
-  text.className = "def-text";
-  text.textContent = def.text;
-  li.append(text);
+  const partOfSpeech = showPos ? def.partOfSpeech : undefined;
+  li.append(createGlossLine(partOfSpeech, def.text));
 
   return li;
 }

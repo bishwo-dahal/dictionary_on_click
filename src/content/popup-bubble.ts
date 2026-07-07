@@ -187,7 +187,7 @@ export class DefinitionBubble {
 
     if (this.meaningsExpanded) {
       for (const group of groupDefinitionsByPos(result.definitions)) {
-        list.append(createPosGroup(group, { showHeader: true, variant: "bubble" }));
+        list.append(createPosGroup(group, { variant: "bubble" }));
       }
     } else {
       appendGlossLines(list, shown, { clamp: true });

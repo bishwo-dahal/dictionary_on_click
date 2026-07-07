@@ -4,9 +4,11 @@ import { isLookupResponse } from "../shared/messages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
 import type { ThemeMode } from "../shared/theme.js";
 import { watchTheme } from "../shared/theme-bind.js";
+import { groupDefinitionsByPos } from "../shared/definition-display.js";
 import { createHeadwordHeader } from "../shared/headword-header.js";
-import { createPosSpan, markReportButtonDone } from "../shared/pos.js";
-import type { Definition, LookupResult } from "../shared/types.js";
+import { markReportButtonDone } from "../shared/pos.js";
+import { createPosGroup } from "../shared/render-definitions.js";
+import type { LookupResult } from "../shared/types.js";
 
 const REPORT_KEY = "brokenWordReports";
 
@@ -32,20 +34,15 @@ async function send(message: BackgroundRequest): Promise<BackgroundResponse> {
   return browser.runtime.sendMessage(message) as Promise<BackgroundResponse>;
 }
 
-function createDefItem(def: Definition): HTMLLIElement {
-  const li = document.createElement("li");
-  li.className = "def-item";
+function createDefinitionsBody(result: LookupResult): HTMLDivElement {
+  const body = document.createElement("div");
+  body.className = "definitions-body";
 
-  if (def.partOfSpeech) {
-    li.append(createPosSpan(def.partOfSpeech));
+  for (const group of groupDefinitionsByPos(result.definitions)) {
+    body.append(createPosGroup(group, { variant: "popup" }));
   }
 
-  const text = document.createElement("p");
-  text.className = "def-text";
-  text.textContent = def.text;
-  li.append(text);
-
-  return li;
+  return body;
 }
 
 function createActions(result: LookupResult): HTMLDivElement {
@@ -131,12 +128,7 @@ function renderSuccess(result: LookupResult): void {
     empty.textContent = "No definition text available.";
     card.append(empty);
   } else {
-    const list = document.createElement("ol");
-    list.className = "def-list";
-    for (const def of result.definitions) {
-      list.append(createDefItem(def));
-    }
-    card.append(list);
+    card.append(createDefinitionsBody(result));
     card.append(createActions(result));
   }
 

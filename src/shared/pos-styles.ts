@@ -138,9 +138,23 @@ export const POS_AND_ICON_STYLES = `
   background: color-mix(in srgb, #60a5fa 16%, transparent);
 }
 
-.gloss-line { margin: 0 0 8px; font-size: 13px; line-height: 1.5; }
+.gloss-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
 .gloss-line:last-of-type { margin-bottom: 10px; }
-.gloss-text { display: inline; }
+.gloss-line .pos {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+.gloss-text {
+  flex: 1;
+  min-width: 0;
+}
 .gloss-text--clamp {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -180,9 +194,10 @@ export const POS_AND_ICON_STYLES = `
 }
 
 .def-item .pos {
-  display: block;
-  margin-right: 0;
-  margin-bottom: 4px;
+  display: inline-block;
+  margin-right: 6px;
+  margin-bottom: 0;
+  vertical-align: baseline;
 }
 
 .card-header .headword { margin: 0; }
