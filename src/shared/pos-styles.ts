@@ -1,4 +1,4 @@
-/** POS badges + icon buttons (bubble shadow DOM + appended to popup.css at build). */
+/** Part-of-speech (POS) badges + icon buttons (bubble shadow DOM + appended to popup.css at build). */
 export const POS_AND_ICON_STYLES = `
 .pos {
   display: inline-block;

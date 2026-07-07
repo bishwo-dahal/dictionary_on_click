@@ -64,7 +64,7 @@ describe("pickBubbleSummary", () => {
     def("verb", "To produce butter by agitating milk."),
   ];
 
-  it("prefers one sense per POS when multiple POS exist (churn-like)", () => {
+  it("prefers one meaning per POS when multiple POS exist (churn-like)", () => {
     const { shown, hiddenCount } = pickBubbleSummary(churnLike, { maxTotal: 4 });
 
     expect(shown).toHaveLength(2);
@@ -72,6 +72,25 @@ describe("pickBubbleSummary", () => {
     expect(shown[0].text).toBe("To agitate rapidly.");
     expect(shown[1].text).toBe("A vessel used for churning.");
     expect(hiddenCount).toBe(2);
+  });
+
+  it("caps at maxTotal of 5 across POS priority", () => {
+    const definitions = [
+      def("adverb", "adv1"),
+      def("verb", "v1"),
+      def("noun", "n1"),
+      def("adjective", "adj1"),
+      def("noun", "n2"),
+    ];
+
+    const { shown, hiddenCount } = pickBubbleSummary(definitions, { maxTotal: 5 });
+    expect(shown.map((d) => normalizePos(d.partOfSpeech))).toEqual([
+      "verb",
+      "noun",
+      "adjective",
+      "adverb",
+    ]);
+    expect(hiddenCount).toBe(1);
   });
 
   it("respects maxTotal across POS priority", () => {

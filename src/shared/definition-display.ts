@@ -1,11 +1,20 @@
+/**
+ * Definition display helpers: grouping and bubble preview selection.
+ *
+ * POS = part of speech (noun, verb, adjective, adverb, etc.). Providers attach a
+ * `partOfSpeech` string to each Definition; we normalize those into canonical POS
+ * buckets for grouping and for picking a diverse collapsed bubble preview.
+ */
 import type { Definition } from "./types.js";
 
-/** Canonical POS keys, in display/selection priority order. */
+/** Canonical part-of-speech (POS) keys, in display/selection priority order. */
 export const POS_PRIORITY = ["verb", "noun", "adjective", "adverb", "other"] as const;
 
+/** A normalized part-of-speech bucket key (POS). */
 export type CanonicalPos = (typeof POS_PRIORITY)[number];
 
 export interface PosGroup {
+  /** Normalized part of speech (POS). */
   pos: CanonicalPos;
   label: string;
   items: Definition[];
@@ -13,7 +22,7 @@ export interface PosGroup {
 
 export interface PickBubbleSummaryOptions {
   maxTotal: number;
-  /** Max senses taken from each POS when multiple POS buckets exist. */
+  /** Max meanings taken from each POS bucket when multiple parts of speech exist. */
   maxPerPos?: number;
 }
 
@@ -22,6 +31,7 @@ export interface PickBubbleSummaryResult {
   hiddenCount: number;
 }
 
+/** Maps provider part-of-speech strings to canonical POS keys. */
 const POS_ALIASES: Record<string, CanonicalPos> = {
   noun: "noun",
   n: "noun",
@@ -34,7 +44,7 @@ const POS_ALIASES: Record<string, CanonicalPos> = {
   adv: "adverb",
 };
 
-/** Map provider POS strings to canonical keys for grouping and selection. */
+/** Map a provider `partOfSpeech` value to a canonical POS key. */
 export function normalizePos(partOfSpeech?: string): CanonicalPos {
   if (!partOfSpeech?.trim()) {
     return "other";
@@ -46,7 +56,7 @@ export function normalizePos(partOfSpeech?: string): CanonicalPos {
   return POS_ALIASES[key] ?? "other";
 }
 
-/** Human-readable POS label for section headers. */
+/** Human-readable part-of-speech label for section headers. */
 export function posLabel(pos: CanonicalPos): string {
   switch (pos) {
     case "noun":
@@ -88,9 +98,9 @@ export function groupDefinitionsByPos(definitions: readonly Definition[]): PosGr
 }
 
 /**
- * Pick senses for the collapsed double-click bubble.
- * Multiple POS: up to one sense per POS (priority order), capped by maxTotal.
- * Single POS: up to maxTotal senses from that POS (API order).
+ * Pick meanings for the collapsed double-click bubble.
+ * When multiple POS buckets exist: up to one meaning per part of speech (priority order), capped by maxTotal.
+ * When only one POS exists: up to maxTotal meanings from that part of speech (API order).
  */
 export function pickBubbleSummary(
   definitions: readonly Definition[],
