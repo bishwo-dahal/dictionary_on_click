@@ -6,7 +6,7 @@ Try it at: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/dictionary-o
 
 ## Status
 
-**v0.1.1** — feature-complete MVP: double-click bubble, toolbar dictionary, provider health circuit breakers, options (history, telemetry, reports), and multi-provider lookups with IndexedDB cache.
+**v0.1.2** — part-of-speech–aware meanings in the double-click bubble (expandable preview, configurable totals), plus the v0.1.1 MVP (toolbar dictionary, provider health, options, multi-provider lookups with cache).
 
 ```bash
 npm run ci    # test + build + lint
