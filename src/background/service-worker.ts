@@ -1,5 +1,6 @@
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
 import type { BrokenWordReport } from "../shared/telemetry-types.js";
+import type Browser from "webextension-polyfill";
 import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
@@ -49,7 +50,7 @@ browser.runtime.onMessageExternal.addListener(
 
 async function handleExternalMessage(
   message: unknown,
-  sender: browser.runtime.MessageSender,
+  sender: Browser.Runtime.MessageSender,
 ): Promise<unknown> {
   const settings = await loadSettings();
   if (!settings.allowExternalHistory) {
