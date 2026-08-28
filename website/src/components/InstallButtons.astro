@@ -1,0 +1,89 @@
+---
+import { site } from '../data/site';
+import BrandMark from './BrandMark.astro';
+
+const slots = [
+  {
+    store: 'firefox' as const,
+    href: site.firefox,
+    label: 'Add to Firefox',
+    filled: true,
+    meta: `v${site.version} · Firefox ${site.firefoxMin}+`,
+  },
+  {
+    store: 'chrome' as const,
+    href: site.chrome,
+    label: 'Add to Chrome',
+    filled: false,
+    meta: `v${site.version} · Chrome ${site.chromeMin}+`,
+  },
+  {
+    store: 'github' as const,
+    href: site.github,
+    label: 'Source code',
+    filled: false,
+    meta: 'GitHub (bishwo-dahal)',
+  },
+];
+---
+
+<div
+  class="install-pair mx-auto grid w-full max-w-3xl gap-x-4 gap-y-2 sm:grid-cols-3"
+>
+  {
+    slots.map((s) => (
+      <div class="store-slot flex flex-col" data-store={s.store}>
+        <a
+          href={s.href}
+          data-store={s.store}
+          class:list={[
+            'store-card inline-flex min-h-14 items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-semibold transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+            s.filled
+              ? 'store-card-fill bg-accent text-white hover:bg-accent-hover'
+              : 'store-card-ghost border border-border bg-elevated text-foreground hover:border-foreground/40',
+          ]}
+        >
+          <BrandMark name={s.store} class="h-6 w-6 shrink-0" />
+          {s.label}
+        </a>
+        <p class="mt-2 text-center text-xs text-muted">{s.meta}</p>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  function preferChrome(ua: string) {
+    const isFirefox = /Firefox\//.test(ua);
+    const isChromium =
+      /Chrome\//.test(ua) || /Chromium\//.test(ua) || /Edg\//.test(ua);
+    return isChromium && !isFirefox;
+  }
+
+  function paint(el: Element, filled: boolean) {
+    el.classList.toggle('store-card-fill', filled);
+    el.classList.toggle('bg-accent', filled);
+    el.classList.toggle('text-white', filled);
+    el.classList.toggle('hover:bg-accent-hover', filled);
+    el.classList.toggle('store-card-ghost', !filled);
+    el.classList.toggle('border', !filled);
+    el.classList.toggle('border-border', !filled);
+    el.classList.toggle('bg-elevated', !filled);
+    el.classList.toggle('text-foreground', !filled);
+    el.classList.toggle('hover:border-foreground/40', !filled);
+  }
+
+  function reorder(root: Element) {
+    if (!preferChrome(navigator.userAgent)) return;
+    const firefox = root.querySelector('.store-slot[data-store="firefox"]');
+    const chrome = root.querySelector('.store-slot[data-store="chrome"]');
+    if (!firefox || !chrome) return;
+    root.prepend(chrome);
+    const chromeA = chrome.querySelector('a');
+    const firefoxA = firefox.querySelector('a');
+    if (chromeA) paint(chromeA, true);
+    if (firefoxA) paint(firefoxA, false);
+  }
+
+  document.querySelectorAll('.install-pair').forEach(reorder);
+</script>

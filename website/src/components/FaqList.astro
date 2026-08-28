@@ -1,0 +1,21 @@
+---
+import { faqs } from '../data/site';
+import Icon from './Icon.astro';
+---
+
+<div class="divide-y divide-border rounded-2xl border border-border bg-elevated">
+  {
+    faqs.map((item) => (
+      <details class="group px-5 py-2">
+        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 py-3 text-left font-medium text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+          {item.q}
+          <Icon
+            name="chevron"
+            class="h-5 w-5 shrink-0 text-muted transition duration-200 group-open:rotate-180"
+          />
+        </summary>
+        <p class="pb-4 text-sm leading-relaxed text-muted">{item.a}</p>
+      </details>
+    ))
+  }
+</div>

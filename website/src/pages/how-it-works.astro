@@ -1,0 +1,110 @@
+---
+import Icon from '../components/Icon.astro';
+import ProductShot from '../components/ProductShot.astro';
+import Shot from '../components/Shot.astro';
+import { breadcrumb, orgGraph } from '../data/jsonld';
+import { site } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const jsonLd = orgGraph('/how-it-works', [
+  breadcrumb([
+    { name: 'Home', path: '/' },
+    { name: 'How it works', path: '/how-it-works' },
+  ]),
+  {
+    '@type': 'HowTo',
+    name: 'Look up a word with Dictionary on Click',
+    step: [
+      { '@type': 'HowToStep', name: 'Double-click a word', text: 'Select any word on a web page.' },
+      { '@type': 'HowToStep', name: 'Read the bubble', text: 'A definition card opens without leaving the page.' },
+      { '@type': 'HowToStep', name: 'Use the toolbar', text: 'Open the toolbar popup for the full entry.' },
+    ],
+  },
+]);
+---
+
+<BaseLayout
+  title="How it works | Dictionary on Click"
+  description="Double-click a word, read the bubble, expand meanings, hear pronunciation, and look up more from the toolbar. Dictionary on Click stays on the page."
+  path="/how-it-works"
+  jsonLd={jsonLd}
+>
+  <article class="mx-auto max-w-3xl px-4 py-16 md:px-6 md:pb-10 md:pt-24">
+    <p class="overline-label">Walkthrough</p>
+    <h1 class="mt-4 font-display text-4xl leading-[1.1] md:text-6xl">From double-click to definition</h1>
+    <p class="mt-6 text-muted">
+      The extension lives in the page you are already reading. Here is the path from a stuck word to a usable gloss.
+    </p>
+  </article>
+  <div class="px-4 md:px-6">
+    <ProductShot />
+  </div>
+  <article class="mx-auto max-w-3xl px-4 py-16 md:px-6">
+    <ol class="space-y-16">
+      <li>
+        <p class="overline-label">01</p>
+        <h2 class="mt-2 font-display text-2xl md:text-4xl">Select a word</h2>
+        <p class="mt-4 leading-relaxed text-muted">
+          Double-click any word. You do not highlight a sentence, open a new tab, or paste into a search box. The click is the lookup.
+        </p>
+      </li>
+      <li>
+        <p class="overline-label">02</p>
+        <h2 class="mt-2 font-display text-2xl md:text-4xl">Read the bubble preview</h2>
+        <p class="mt-4 leading-relaxed text-muted">
+          A rounded card appears in a closed Shadow DOM, so hostile page CSS cannot flatten it. You see the headword, pronunciation, part-of-speech chips, and one short meaning first.
+        </p>
+        <div class="mt-8">
+          <Shot
+            src="/screenshots/bubble-apotheosis.png"
+            alt="Dark definition bubble for apotheosis over article text, with noun senses and a See full definition button"
+            width={951}
+            height={559}
+          />
+        </div>
+      </li>
+      <li>
+        <p class="overline-label">03</p>
+        <h2 class="mt-2 font-display text-2xl md:text-4xl">Expand meanings</h2>
+        <p class="mt-4 leading-relaxed text-muted">
+          One gloss is enough to keep reading. When it is not, open the rest of the senses without dumping a wall of text on first click.
+        </p>
+      </li>
+      <li>
+        <p class="overline-label">04</p>
+        <h2 class="mt-2 font-display text-2xl md:text-4xl">Hear it</h2>
+        <p class="mt-4 flex items-start gap-3 leading-relaxed text-muted">
+          <Icon name="volume" class="mt-1 h-5 w-5 shrink-0 text-accent" />
+          Pronunciation audio is in the full entry when the provider has it. Useful when the IPA line is not enough.
+        </p>
+      </li>
+      <li>
+        <p class="overline-label">05</p>
+        <h2 class="mt-2 font-display text-2xl md:text-4xl">Toolbar lookup</h2>
+        <p class="mt-4 leading-relaxed text-muted">
+          Click the toolbar icon when you want to type a word, copy a definition, or share it. Same dictionary, more room.
+        </p>
+        <div class="mt-8">
+          <Shot
+            src="/screenshots/toolbar-lookup.png"
+            alt="Toolbar Dictionary popup with a lookup field, Look up button, language set to English US, and theme set to System"
+            width={951}
+            height={559}
+          />
+        </div>
+      </li>
+      <li>
+        <p class="overline-label">06</p>
+        <h2 class="mt-2 font-display text-2xl md:text-4xl">Options</h2>
+        <p class="mt-4 leading-relaxed text-muted">
+          System, light, or dark to match the extension UI. History is off until you turn it on. Stats stay on the device.
+        </p>
+      </li>
+    </ol>
+
+    <p class="mt-16 text-sm text-muted">
+      Need the stores? <a class="text-accent hover:text-accent-hover" href="/install">Install Dictionary on Click</a>
+      for Firefox {site.firefoxMin}+ or Chrome {site.chromeMin}+.
+    </p>
+  </article>
+</BaseLayout>

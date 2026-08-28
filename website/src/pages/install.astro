@@ -1,0 +1,60 @@
+---
+import FaqList from '../components/FaqList.astro';
+import Icon from '../components/Icon.astro';
+import InstallButtons from '../components/InstallButtons.astro';
+import { breadcrumb, orgGraph } from '../data/jsonld';
+import { site } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const jsonLd = orgGraph('/install', [
+  breadcrumb([
+    { name: 'Home', path: '/' },
+    { name: 'Install', path: '/install' },
+  ]),
+]);
+---
+
+<BaseLayout
+  title="Install | Dictionary on Click"
+  description="Install Dictionary on Click from Firefox Add-ons or the Chrome Web Store. Firefox 142+, Chrome 120+. Build from source via GitHub if you are reviewing the package."
+  path="/install"
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-3xl px-4 py-16 md:px-6 md:py-24">
+    <p class="overline-label">Stores</p>
+    <h1 class="mt-4 font-display text-4xl leading-[1.1] md:text-6xl">Install Dictionary on Click</h1>
+    <p class="mt-6 text-muted">
+      Use the official listings. Version {site.version}. Firefox {site.firefoxMin} and newer, Chrome {site.chromeMin} and newer.
+    </p>
+    <div class="mt-10">
+      <InstallButtons />
+    </div>
+    <p class="mt-6 text-sm text-muted">
+      After install, open any article, double-click a word, and the bubble should appear. Grant the listed permissions when the browser asks.
+    </p>
+
+    <section class="mt-16 border-t border-border pt-10">
+      <h2 class="font-display text-2xl">Build from source</h2>
+      <p class="mt-4 text-muted">
+        For reviewers and sideloaders. Commands live in
+        <a class="text-accent hover:text-accent-hover" href={site.buildMd}>BUILD.md</a>
+        on
+        <a class="text-accent hover:text-accent-hover" href={site.github}>GitHub</a>.
+      </p>
+      <pre class="mt-6 overflow-x-auto rounded-xl border border-border bg-elevated p-4 font-mono text-sm text-foreground"><code>npm run build:all
+npm run package
+npm run package:chrome</code></pre>
+      <p class="mt-4 inline-flex items-center gap-2 text-sm text-muted">
+        <Icon name="github" class="h-4 w-4" />
+        This website does not host the .xpi or Chrome zip.
+      </p>
+    </section>
+
+    <section class="mt-16">
+      <h2 class="font-display text-2xl">Questions</h2>
+      <div class="mt-6">
+        <FaqList />
+      </div>
+    </section>
+  </div>
+</BaseLayout>

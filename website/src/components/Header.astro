@@ -1,0 +1,211 @@
+---
+import { nav, site } from '../data/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+function isActive(href: string) {
+  if (href === '/') return currentPath === '/';
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+}
+---
+
+<header class="sticky top-0 z-40 h-16 border-b border-border bg-elevated">
+  <div class="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
+    <a
+      href="/"
+      class="flex min-w-0 items-center gap-2.5 font-display text-lg text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+    >
+      <img src="/icon-128.png" alt="" width="28" height="28" class="rounded-md" />
+      Dictionary on Click
+    </a>
+    <nav class="hidden items-center gap-6 lg:flex" aria-label="Primary">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'relative text-sm font-medium transition duration-200 after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-accent after:transition after:duration-200 hover:text-accent hover:after:scale-x-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+              isActive(item.href) ? 'text-accent after:scale-x-100' : 'text-muted',
+            ]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-foreground transition duration-200 hover:bg-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        aria-label="Switch color theme"
+      >
+        <span class="dark-only hidden">
+          <Icon name="sun" class="h-5 w-5" />
+        </span>
+        <span class="light-only">
+          <Icon name="moon" class="h-5 w-5" />
+        </span>
+      </button>
+      <a
+        href={site.firefox}
+        data-header-install
+        class="hidden min-h-11 items-center gap-2 whitespace-nowrap rounded-lg bg-accent px-3 text-sm font-medium text-white transition duration-200 hover:bg-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:inline-flex"
+      >
+        <img
+          data-install-logo
+          src="/logos/firefox.png"
+          alt=""
+          width="16"
+          height="16"
+          class="h-4 w-4 object-contain"
+        />
+        <span data-install-label>Install on Firefox</span>
+      </a>
+      <button
+        type="button"
+        id="menu-btn"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-foreground hover:bg-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:hidden"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+      >
+        <span class="menu-open">
+          <Icon name="menu" />
+        </span>
+        <span class="menu-close hidden">
+          <Icon name="x" />
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    id="mobile-nav"
+    class="hidden border-t border-border bg-elevated lg:hidden"
+    hidden
+  >
+    <nav class="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4" aria-label="Mobile">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'rounded-lg px-3 py-3 text-base font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+              isActive(item.href) ? 'bg-background text-accent' : 'text-foreground',
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <a
+        href={site.firefox}
+        data-header-install
+        class="mt-2 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-accent px-4 font-medium text-white"
+      >
+        <img
+          data-install-logo
+          src="/logos/firefox.png"
+          alt=""
+          width="18"
+          height="18"
+          class="h-[18px] w-[18px] object-contain"
+        />
+        <span data-install-label>Install on Firefox</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  import { site } from '../data/site';
+
+  function preferredStore(ua: string) {
+    const isFirefox = /Firefox\//.test(ua);
+    if (isFirefox) return 'firefox' as const;
+    const isChromium =
+      /Chrome\//.test(ua) || /Chromium\//.test(ua) || /Edg\//.test(ua);
+    if (isChromium) return 'chrome' as const;
+    return 'other' as const;
+  }
+
+  function paintHeaderInstall() {
+    const store = preferredStore(navigator.userAgent);
+    document.querySelectorAll<HTMLAnchorElement>('[data-header-install]').forEach((link) => {
+      const logo = link.querySelector<HTMLImageElement>('[data-install-logo]');
+      const label = link.querySelector('[data-install-label]');
+      if (!label) return;
+
+      if (store === 'chrome') {
+        link.href = site.chrome;
+        label.textContent = 'Install on Chrome';
+        if (logo) {
+          logo.src = '/logos/chrome.png';
+          logo.hidden = false;
+        }
+      } else if (store === 'firefox') {
+        link.href = site.firefox;
+        label.textContent = 'Install on Firefox';
+        if (logo) {
+          logo.src = '/logos/firefox.png';
+          logo.hidden = false;
+        }
+      } else {
+        link.href = '/install';
+        label.textContent = 'Install';
+        if (logo) logo.hidden = true;
+      }
+    });
+  }
+
+  paintHeaderInstall();
+</script>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.getElementById('theme-toggle');
+  const menuBtn = document.getElementById('menu-btn');
+  const drawer = document.getElementById('mobile-nav');
+  const openIcon = menuBtn?.querySelector('.menu-open');
+  const closeIcon = menuBtn?.querySelector('.menu-close');
+
+  function syncThemeIcons() {
+    const dark = root.dataset.theme === 'dark';
+    document.querySelectorAll('.dark-only').forEach((el) => el.classList.toggle('hidden', !dark));
+    document.querySelectorAll('.light-only').forEach((el) => el.classList.toggle('hidden', dark));
+  }
+
+  syncThemeIcons();
+
+  toggle?.addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    localStorage.setItem('theme', next);
+    syncThemeIcons();
+  });
+
+  menuBtn?.addEventListener('click', () => {
+    const open = drawer?.hasAttribute('hidden') === false;
+    if (open) {
+      drawer?.setAttribute('hidden', '');
+      drawer?.classList.add('hidden');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      menuBtn.setAttribute('aria-label', 'Open menu');
+      openIcon?.classList.remove('hidden');
+      closeIcon?.classList.add('hidden');
+    } else {
+      drawer?.removeAttribute('hidden');
+      drawer?.classList.remove('hidden');
+      menuBtn.setAttribute('aria-expanded', 'true');
+      menuBtn.setAttribute('aria-label', 'Close menu');
+      openIcon?.classList.add('hidden');
+      closeIcon?.classList.remove('hidden');
+    }
+  });
+</script>

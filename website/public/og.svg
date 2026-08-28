@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="72" y="80" width="1056" height="470" rx="24" fill="#1e293b" stroke="#334155"/>
+  <text x="110" y="180" fill="#94a3b8" font-family="Georgia, serif" font-size="22">Dictionary on Click</text>
+  <text x="110" y="270" fill="#f1f5f9" font-family="Georgia, serif" font-size="52">Double-click a word.</text>
+  <text x="110" y="340" fill="#3b82f6" font-family="Georgia, serif" font-size="52" font-style="italic">Stay on the page.</text>
+  <rect x="720" y="200" width="340" height="240" rx="16" fill="#0f172a" stroke="#334155"/>
+  <text x="748" y="250" fill="#f1f5f9" font-family="Georgia, serif" font-size="28">ephemeral</text>
+  <text x="748" y="280" fill="#94a3b8" font-family="monospace" font-size="14">/ɪˈfɛm.ər.əl/</text>
+  <rect x="748" y="300" width="48" height="24" rx="4" fill="#1e3a8a"/>
+  <text x="758" y="317" fill="#3b82f6" font-family="sans-serif" font-size="12">adj.</text>
+  <text x="748" y="360" fill="#f1f5f9" font-family="sans-serif" font-size="16">Lasting for a very short time.</text>
+</svg>
