@@ -2,7 +2,9 @@
 
 Browser extension for **Firefox** and **Chrome**: double-click any word for a definition bubble, or use the toolbar dictionary for full entries. Built for reliability with free, keyless APIs (Wiktionary, Free Dictionary API, Datamuse).
 
-Try it at: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/dictionary-on-click/)
+Website: [dictionary-on-click.bishwodahal.com](https://dictionary-on-click.bishwodahal.com)
+
+Try it at: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/dictionary-on-click/) · [Chrome](https://chromewebstore.google.com/detail/dictionary-on-click/hmjpafbglgihbbfamlljmcempfhfchjm)
 
 ## Status
 
