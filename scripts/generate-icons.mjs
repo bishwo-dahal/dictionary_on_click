@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const svg = join(root, "assets/icons/icon.svg");
-const sizes = [48, 96, 128];
+const sizes = [16, 48, 96, 128];
 
 function magickAvailable() {
   const r = spawnSync("magick", ["--version"], { stdio: "ignore" });
@@ -41,7 +41,7 @@ if (!magickAvailable()) {
   console.error(
     "magick (ImageMagick 7) is required to generate icons.\n" +
       "Install it (e.g. dnf install ImageMagick / apt install imagemagick),\n" +
-      "or commit assets/icons/icon-48.png, icon-96.png, and icon-128.png.",
+      "or commit assets/icons/icon-16.png, icon-48.png, icon-96.png, and icon-128.png.",
   );
   process.exit(1);
 }

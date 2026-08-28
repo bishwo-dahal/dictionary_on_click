@@ -1,61 +1,67 @@
 # Dictionary on Click
 
-Firefox extension: double-click any word for a definition bubble, or use the toolbar dictionary for full entries. Built for reliability with free, keyless APIs (Wiktionary, Free Dictionary API, Datamuse).
+Browser extension for **Firefox** and **Chrome**: double-click any word for a definition bubble, or use the toolbar dictionary for full entries. Built for reliability with free, keyless APIs (Wiktionary, Free Dictionary API, Datamuse).
 
 Try it at: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/dictionary-on-click/)
 
 ## Status
 
-**v0.1.2** — part-of-speech–aware meanings in the double-click bubble (expandable preview, configurable totals), plus the v0.1.1 MVP (toolbar dictionary, provider health, options, multi-provider lookups with cache).
+**v0.1.2** — smarter double-click bubble: meanings by part of speech, expandable preview, and new Reading settings.
 
 ```bash
-npm run ci    # test + build + lint
+npm run ci    # test + build (Firefox + Chrome) + lint
 npm start     # load in Firefox
 ```
 
 ## Requirements
 
 - Node.js 20+
-- ImageMagick 7 (`magick`) — for icon generation
-- Firefox 140+ (see `manifest.json` `strict_min_version`)
+- ImageMagick 7 (`magick`) — optional; for icon regeneration
+- Firefox 142+ or Chrome 120+
 
-## Build from source (AMO / reviewers)
+## Build from source
 
-**Human-readable source** is in `src/` (TypeScript). **Built add-on** is in `dist/` after:
+**Human-readable source** is in `src/` (TypeScript). **Built add-ons**:
+
+| Browser | Output | Command |
+|---------|--------|---------|
+| Firefox | `dist/` | `npm run build` |
+| Chrome | `dist-chrome/` | `npm run build:chrome` |
+| Both | both folders | `npm run build:all` |
 
 ```bash
 npm ci
-npm run build
+npm run build:all
 ```
 
-Full step-by-step instructions, tool versions, and environment requirements: **[BUILD.md](./BUILD.md)**.
+Full instructions: **[BUILD.md](./BUILD.md)**.
 
 ## Development
 
 ```bash
 npm install
-npm run build    # output → dist/
+npm run build        # Firefox → dist/
+npm run build:chrome # Chrome → dist-chrome/
 npm test
-npm start        # build + launch Firefox with extension loaded (temp profile copy)
-npm run load     # build only; prints path for manual install
+npm start            # build + launch Firefox
+npm run load         # build Firefox; prints path for manual install
 ```
 
-### Extension not showing?
+### Load in Firefox
 
-1. **Confirm it loaded:** open `about:debugging` → **This Firefox** — you should see “Dictionary on Click”.
-2. **Pin the icon:** click the puzzle piece in the toolbar → pin “Dictionary on Click”.
-3. **If `npm start` fails with `ECONNREFUSED`:** use manual load instead:
-   - `npm run load`
-   - Firefox → `about:debugging` → **This Firefox** → **Load Temporary Add-on…** → choose `dist/manifest.json`
+1. `npm run load`
+2. `about:debugging` → **This Firefox** → **Load Temporary Add-on…** → `dist/manifest.json`
 
-Do **not** use `--keep-profile-changes` with `web-ext` on Fedora — Firefox opens but the debugger connection often never completes, so the extension is never installed.
-```
+### Load in Chrome
 
-For watch mode during development:
+1. `npm run build:chrome`
+2. `chrome://extensions` → **Developer mode** → **Load unpacked** → select the `dist-chrome/` folder
+
+### Package for stores
 
 ```bash
-npm run watch    # rebuild on file changes
-# In another terminal, run web-ext against dist/
+npm run package         # Firefox zip (web-ext)
+npm run package:chrome  # Chrome zip → web-ext-artifacts/
 ```
 
 ## Project layout
@@ -67,7 +73,8 @@ src/
   popup/          Toolbar dictionary UI
   options/        Settings, history, telemetry, reports
   shared/         Types, errors, languages, message protocol
-dist/             Built extension (gitignored)
+dist/             Built Firefox extension (gitignored)
+dist-chrome/      Built Chrome extension (gitignored)
 ```
 
 ## Privacy

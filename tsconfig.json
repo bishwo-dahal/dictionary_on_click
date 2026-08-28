@@ -12,7 +12,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["firefox-webext-browser", "node"]
+    "types": ["webextension-polyfill", "node"]
   },
   "include": ["src/**/*", "scripts/**/*", "tests/**/*", "vitest.config.ts"]
 }
