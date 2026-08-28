@@ -1,0 +1,20 @@
+{
+  "name": "Dictionary on Click",
+  "short_name": "Dictionary",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#1a2333",
+  "theme_color": "#1a2333",
+  "icons": [
+    {
+      "src": "/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

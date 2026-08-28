@@ -1,0 +1,86 @@
+---
+import DemoLine from './DemoLine.astro';
+import ExtBubble from './ExtBubble.astro';
+import { site } from '../data/site';
+
+const demoUrl = site.url.replace('https://', '');
+---
+
+<figure class="mx-auto max-w-5xl">
+  <p class="overline-label mb-4 text-center">Demo</p>
+  <div
+    class="overflow-hidden rounded-2xl border border-border bg-elevated"
+  >
+    <div class="flex items-center gap-3 border-b border-border px-4 py-3">
+      <span class="flex gap-1.5" aria-hidden="true">
+        <span class="h-2.5 w-2.5 rounded-full bg-[#f87171]"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-[#fbbf24]"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-[#34d399]"></span>
+      </span>
+      <p
+        class="min-w-0 flex-1 truncate rounded-md bg-background px-3 py-1 font-mono text-[11px] text-muted"
+      >
+        {demoUrl}
+      </p>
+      <img src="/icon-128.png" alt="" width="18" height="18" class="rounded-sm" />
+    </div>
+    <div
+      class="relative bg-[#f4f1ea] px-5 py-8 text-[#111] md:min-h-[28rem] md:px-12 md:py-12"
+      data-product-demo
+      aria-label="Interactive lookup demo. Double-click a word for a short definition."
+    >
+      <p class="font-serif text-xl md:text-2xl">
+        <DemoLine text="Dictionary on Click" />
+      </p>
+      <p class="mt-4 text-sm leading-7 md:text-[15px]">
+        <DemoLine
+          text="Dictionary on Click is a free Firefox and Chrome extension. Double-click any word for a definition bubble on the page, even a sesquipedalian one. You never leave the article for a new tab."
+        />
+      </p>
+      <p class="mt-4 text-sm leading-7 md:text-[15px]">
+        <DemoLine
+          text="Lookups use Wiktionary and other free providers, then a fallback chain. A recalcitrant API trips the circuit breaker. IndexedDB caches the lemma so the bubble is never vacuous."
+        />
+      </p>
+      <p class="mt-4 text-sm leading-7 md:text-[15px]">
+        <DemoLine
+          text="There is no remote telemetry and no API key. Page styles cannot pierce the shadow root. Install Dictionary on Click from Firefox Addons or the Chrome Web Store."
+        />
+      </p>
+      <div class="demo-slot" data-demo-slot hidden inert>
+        <ExtBubble />
+      </div>
+    </div>
+  </div>
+  <figcaption class="mx-auto mt-6 max-w-2xl text-center text-sm italic text-muted">
+    Double-click a word in the window.
+  </figcaption>
+</figure>
+
+<style>
+  [data-product-demo] ::selection {
+    background: #bfdbfe;
+    color: #1e3a8a;
+  }
+
+  .demo-word {
+    cursor: text;
+    border-radius: 2px;
+  }
+
+  .demo-word.is-press {
+    background: #93c5fd;
+    color: #1e3a8a;
+  }
+
+  .demo-slot {
+    position: absolute;
+    z-index: 20;
+    width: max-content;
+    max-width: calc(100% - 1.5rem);
+  }
+</style>
+
+<script>
+  import '../scripts/demo-lookup';
+</script>

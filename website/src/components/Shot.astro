@@ -1,0 +1,41 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  caption?: string;
+  priority?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  caption,
+  priority = false,
+  class: className = '',
+} = Astro.props;
+---
+
+<figure class:list={['mx-auto w-full', className]}>
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    class="h-auto w-full rounded-2xl border border-border"
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding="async"
+  />
+  {
+    caption ? (
+      <figcaption class="mx-auto mt-4 max-w-2xl text-center text-sm italic text-muted">
+        {caption}
+      </figcaption>
+    ) : null
+  }
+</figure>

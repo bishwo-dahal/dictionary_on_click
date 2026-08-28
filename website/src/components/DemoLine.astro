@@ -1,0 +1,20 @@
+---
+import { tokenizeDemo } from '../data/demo-lexicon';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const tokens = tokenizeDemo(text);
+---
+
+{
+  tokens.map((token) =>
+    token.kind === 'word' ? (
+      <span class="demo-word" data-word={token.key}>{token.display}</span>
+    ) : (
+      token.display
+    )
+  )
+}

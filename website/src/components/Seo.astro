@@ -1,0 +1,58 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  path,
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const canonical = path === '/' ? site.url : `${site.url}${path}`;
+const ogImage = `${site.url}/og.png`;
+const robots = noindex ? 'noindex, follow' : 'index, follow';
+const jsonLdText = jsonLd ? JSON.stringify(jsonLd) : null;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content={site.author} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content={robots} />
+<meta name="theme-color" content="#1a2333" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#eef1f6" media="(prefers-color-scheme: light)" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:locale" content="en_US" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta
+  property="og:image:alt"
+  content="Dictionary on Click: a definition bubble on a dark reading page"
+/>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta
+  name="twitter:image:alt"
+  content="Dictionary on Click: a definition bubble on a dark reading page"
+/>
+{
+  jsonLdText ? (
+    <script type="application/ld+json" set:html={jsonLdText} />
+  ) : null
+}

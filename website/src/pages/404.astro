@@ -1,0 +1,50 @@
+---
+import { nav } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+Astro.response.status = 404;
+---
+
+<BaseLayout
+  title="Page not found | Dictionary on Click"
+  description="That URL is not a page on the Dictionary on Click site. Head home or open the install page."
+  path="/404"
+  noindex
+>
+  <div class="mx-auto max-w-xl px-4 py-24 md:px-6">
+    <p class="font-mono text-sm text-danger">404</p>
+    <h1 class="mt-4 font-display text-4xl md:text-6xl">That page is not in this dictionary</h1>
+    <p class="mt-6 text-muted">
+      The address does not match a page we publish. Try a section below, or go back to the homepage.
+    </p>
+    <label class="mt-8 block text-sm font-medium" for="page-filter">Filter pages</label>
+    <input
+      id="page-filter"
+      type="search"
+      class="mt-2 h-12 w-full rounded-lg border border-border bg-elevated px-3 text-foreground placeholder:text-muted focus-visible:border-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      placeholder="How it works, privacy, install…"
+    />
+    <ul id="page-list" class="mt-6 space-y-2">
+      {
+        nav.map((item) => (
+          <li data-label={item.label.toLowerCase()}>
+            <a class="text-accent hover:text-accent-hover" href={item.href}>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <script>
+    const input = document.getElementById('page-filter') as HTMLInputElement | null;
+    const items = document.querySelectorAll('#page-list li');
+    input?.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      items.forEach((li) => {
+        const label = li.getAttribute('data-label') || '';
+        (li as HTMLElement).hidden = q.length > 0 && !label.includes(q);
+      });
+    });
+  </script>
+</BaseLayout>

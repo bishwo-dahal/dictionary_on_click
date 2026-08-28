@@ -1,0 +1,86 @@
+---
+import { breadcrumb, orgGraph } from '../data/jsonld';
+import { site } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const jsonLd = orgGraph('/about', [
+  breadcrumb([
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' },
+  ]),
+  {
+    '@type': 'Person',
+    name: site.author,
+    url: site.github,
+  },
+]);
+---
+
+<BaseLayout
+  title="About | Dictionary on Click"
+  description="Dictionary on Click is an MPL-2.0 Firefox and Chrome extension by Bishwo Dahal."
+  path="/about"
+  jsonLd={jsonLd}
+>
+  <article class="mx-auto max-w-3xl px-4 py-16 md:px-6 md:py-24">
+    <p class="overline-label">About</p>
+    <h1 class="mt-4 font-display text-4xl leading-[1.1] md:text-6xl">Dictionary on Click</h1>
+    <figure class="mt-10">
+      <img
+        src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80"
+        alt="Open hardcover book on a wooden table"
+        width="1200"
+        height="800"
+        class="h-auto w-full rounded-2xl border border-border object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+      <figcaption class="mt-2 text-xs text-muted">Photo via Unsplash</figcaption>
+    </figure>
+    <p class="mt-10 leading-relaxed text-muted">
+      Dictionary on Click started as a way to keep the article in front of you: double-click, read a
+      gloss, continue.
+    </p>
+    <p class="mt-4 leading-relaxed text-muted">
+      It is built in TypeScript, packaged for Firefox and Chrome from the same source, and licensed
+      {site.license}. Builds use esbuild and web-ext. Tests run in Vitest. Browser APIs go through
+      webextension-polyfill. Maintainer:
+      <a class="text-accent hover:text-accent-hover" href={site.github}>{site.author}</a>.
+    </p>
+    <p class="mt-4 leading-relaxed text-muted">
+      The extension ships eighteen dictionary languages, plus system, light, and dark UI. This website
+      is English. Definitions come from Wiktionary, Free Dictionary API, and Datamuse.
+    </p>
+
+    <h2 class="mt-14 font-display text-2xl md:text-4xl">Contribute</h2>
+    <p class="mt-4 leading-relaxed text-muted">
+      Issues and pull requests are welcome. Open a ticket if a word is wrong, a browser build fails, or
+      you want to discuss a change. Follow
+      <a class="text-accent hover:text-accent-hover" href={site.buildMd}>BUILD.md</a>
+      for a local Firefox and Chrome package. The code is {site.license}, so contributions follow that
+      license.
+    </p>
+
+    <h2 class="mt-14 font-display text-2xl md:text-4xl">Links</h2>
+    <ul class="mt-4 space-y-0 text-sm">
+      {
+        [
+          { href: site.github, label: 'GitHub repository' },
+          { href: site.githubIssues, label: 'Issues' },
+          { href: site.buildMd, label: 'BUILD.md' },
+          { href: site.firefox, label: 'Firefox Add-ons' },
+          { href: site.chrome, label: 'Chrome Web Store' },
+          { href: '/install', label: 'Install page' },
+          { href: '/privacy', label: 'Privacy' },
+          { href: site.licenseUrl, label: `${site.license} license` },
+        ].map((item) => (
+          <li class="border-t border-border py-3">
+            <a class="text-accent hover:text-accent-hover" href={item.href}>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </article>
+</BaseLayout>

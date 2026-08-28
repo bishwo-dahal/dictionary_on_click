@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dictionary-on-click.bishwodahal.com/sitemap-index.xml

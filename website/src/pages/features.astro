@@ -1,0 +1,93 @@
+---
+import Icon from '../components/Icon.astro';
+import Shot from '../components/Shot.astro';
+import { breadcrumb, orgGraph } from '../data/jsonld';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const jsonLd = orgGraph('/features', [
+  breadcrumb([
+    { name: 'Home', path: '/' },
+    { name: 'Features', path: '/features' },
+  ]),
+]);
+
+const sections = [
+  {
+    t: 'Multi-provider lookups',
+    icon: 'languages' as const,
+    d: 'Wiktionary is first. If that miss or times out, Free Dictionary API and Datamuse take the next seats. You see a definition, not an error splash, more often.',
+    callout: 'Three public APIs. No key in the options page.',
+  },
+  {
+    t: 'Cache, with an honest offline story',
+    icon: 'database' as const,
+    d: 'Lookups you already made live in IndexedDB. Open the same word on a train with no signal and the cached entry can still appear. Brand-new words still need the network. There is no bundled unabridged dictionary in the install.',
+    callout: 'Offline means words you already looked up.',
+  },
+  {
+    t: 'Provider health',
+    icon: 'shield' as const,
+    d: 'A circuit breaker watches flaky APIs. When a provider is failing, the extension stops kicking it for a while and leans on the others.',
+    callout: 'Health is local. Nothing phones home about uptime.',
+  },
+  {
+    t: 'POS-aware bubble',
+    icon: 'bubble' as const,
+    d: 'The preview groups by part of speech so "set" as a verb is not buried under a pile of nouns. Shipped in 0.1.2.',
+    callout: 'Chips, then a gloss, then more if you ask.',
+  },
+  {
+    t: 'Selection prefetch',
+    icon: 'mouse' as const,
+    d: 'If you highlight a word, the extension can start the lookup before you fully commit, so the bubble feels instant when it opens.',
+    callout: 'Faster second step, same privacy model.',
+  },
+  {
+    t: 'Broken-word reports',
+    icon: 'book' as const,
+    d: 'When an entry is wrong or empty, you can mark it. That stays a local quality loop, not a required account.',
+    callout: 'Optional. You can ignore it and keep reading.',
+  },
+];
+---
+
+<BaseLayout
+  title="Features | Dictionary on Click"
+  description="Multi-provider dictionary lookups, IndexedDB cache, circuit breaker, POS-aware bubble, selection prefetch, and local broken-word reports."
+  path="/features"
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
+    <p class="overline-label">Capabilities</p>
+    <h1 class="mt-4 max-w-3xl font-display text-4xl leading-[1.1] md:text-6xl">
+      What the extension actually does
+    </h1>
+    <p class="mt-6 max-w-2xl text-muted">
+      These are the pieces behind the bubble, not a feature matrix invented for a landing page.
+    </p>
+    <div class="mt-10 max-w-3xl">
+      <Shot
+        src="/screenshots/bubble-churn.png"
+        alt="Definition bubble for churn over a search page, with verb and noun tags and more meanings"
+        width={607}
+        height={405}
+      />
+    </div>
+    <div class="mt-16 space-y-16">
+      {
+        sections.map((s) => (
+          <section class="grid gap-6 border-t border-border pt-10 md:grid-cols-12">
+            <div class="md:col-span-7">
+              <h2 class="font-display text-2xl md:text-4xl">{s.t}</h2>
+              <p class="mt-4 leading-relaxed text-muted">{s.d}</p>
+            </div>
+            <blockquote class="border-l-2 border-accent pl-4 text-sm text-foreground md:col-span-5 md:border-l-0 md:border-t-0 md:pl-0 md:text-base">
+              <Icon name={s.icon} class="mb-3 h-5 w-5 text-accent" />
+              {s.callout}
+            </blockquote>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
