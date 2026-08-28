@@ -5,6 +5,7 @@ import {
   isRetryable,
   type LookupErrorCode,
 } from "../shared/errors.js";
+import { normalizeDefinitions } from "../shared/normalize-definitions.js";
 import type { LookupFailure, LookupResponse, LookupResult } from "../shared/types.js";
 import { generateVariants, normalizeInput } from "./normalize.js";
 import { isProviderAvailable, recordProviderOutcome } from "./health.js";
@@ -56,6 +57,13 @@ function failure(
     word,
     language,
     retryable: isRetryable(code),
+  };
+}
+
+function finalizeResult(result: LookupResult): LookupResult {
+  return {
+    ...result,
+    definitions: normalizeDefinitions(result.definitions),
   };
 }
 
@@ -167,15 +175,16 @@ export class LookupOrchestrator {
 
           if (outcome.kind === "hit") {
             recordProviderOutcome(provider.id, "ok", latencyMs);
+            const result = finalizeResult(outcome.result);
             if (provider.id !== "cache") {
-              void saveToCache(outcome.result);
+              void saveToCache(result);
             }
-            return { ok: true, result: outcome.result };
+            return { ok: true, result };
           }
 
           if (outcome.kind === "stale") {
             recordProviderOutcome(provider.id, "ok", latencyMs);
-            staleHit = outcome.result;
+            staleHit = finalizeResult(outcome.result);
             continue;
           }
 

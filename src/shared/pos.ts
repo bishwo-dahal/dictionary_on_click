@@ -8,6 +8,46 @@ export function posClassName(partOfSpeech: string): string {
   return key ? `pos pos--${key}` : "pos";
 }
 
+/** Short label shown inside POS pills across bubble and popup. */
+export function posDisplayLabel(partOfSpeech: string): string {
+  const key = partOfSpeech
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "");
+  switch (key) {
+    case "noun":
+    case "n":
+      return "noun";
+    case "verb":
+    case "v":
+      return "verb";
+    case "adjective":
+    case "adj":
+    case "a":
+      return "adj";
+    case "adverb":
+    case "adv":
+      return "adv";
+    case "preposition":
+    case "prep":
+      return "prep";
+    case "conjunction":
+    case "conj":
+      return "conj";
+    case "pronoun":
+    case "pron":
+      return "pron";
+    case "interjection":
+    case "intj":
+      return "intj";
+    case "determiner":
+    case "det":
+      return "det";
+    default:
+      return key || partOfSpeech.toLowerCase();
+  }
+}
+
 import { createReportIcon, createReportDoneIcon } from "./ui-icons.ts";
 
 export function markReportButtonDone(btn: HTMLButtonElement): void {
@@ -37,6 +77,6 @@ export function createReportIconButton(
 export function createPosSpan(partOfSpeech: string): HTMLSpanElement {
   const span = document.createElement("span");
   span.className = posClassName(partOfSpeech);
-  span.textContent = partOfSpeech.toLowerCase();
+  span.textContent = posDisplayLabel(partOfSpeech);
   return span;
 }

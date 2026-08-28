@@ -1,5 +1,6 @@
 import type { DictionaryLanguageId } from "../../shared/languages.js";
 import type { Definition, LookupResult } from "../../shared/types.js";
+import { normalizeDefinitions } from "../../shared/normalize-definitions.js";
 import { fetchJson } from "./fetch-http.js";
 import type { LookupProvider, ProviderOutcome } from "./types.js";
 
@@ -21,9 +22,9 @@ function datamuseLang(language: DictionaryLanguageId): string | null {
 function parseDatamuseDefs(defs: string[]): Definition[] {
   const out: Definition[] = [];
   for (const line of defs) {
-    const text = line.replace(/^\w+:\s*/, "").trim();
-    if (text.length > 2) {
-      out.push({ text });
+    const normalized = normalizeDefinitions([{ text: line }])[0];
+    if (normalized && normalized.text.length > 2) {
+      out.push(normalized);
     }
   }
   return out;
