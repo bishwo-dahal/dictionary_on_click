@@ -1,31 +1,37 @@
 {
   "name": "dictionary-on-click",
   "version": "0.1.2",
-  "description": "Firefox dictionary extension — double-click any word for definitions",
+  "description": "Dictionary extension — double-click any word for definitions",
   "private": true,
   "type": "module",
   "scripts": {
     "icons": "node scripts/generate-icons.mjs",
-    "build": "node scripts/generate-icons.mjs && node scripts/build.mjs",
-    "watch": "node scripts/build.mjs --watch",
+    "build": "node scripts/generate-icons.mjs && node scripts/build.mjs --browser=firefox",
+    "build:chrome": "node scripts/generate-icons.mjs && node scripts/build.mjs --browser=chrome",
+    "build:all": "node scripts/generate-icons.mjs && node scripts/build.mjs --browser=all",
+    "watch": "node scripts/build.mjs --watch --browser=firefox",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "web-ext lint -s dist",
-    "ci": "npm test && npm run build && npm run lint",
+    "ci": "npm test && npm run build:all && npm run lint",
     "start": "npm run build && web-ext run -s dist --firefox /usr/bin/firefox --firefox-profile .firefox-profile --profile-create-if-missing",
     "load": "npm run build && echo \"\\nLoad in Firefox: about:debugging → This Firefox → Load Temporary Add-on → select:\\n  $(pwd)/dist/manifest.json\\n\"",
-    "package": "npm run build && web-ext build -s dist"
+    "package": "npm run build && web-ext build -s dist",
+    "package:chrome": "npm run build:chrome && node scripts/package-chrome.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
-    "@types/firefox-webext-browser": "^143.0.0",
     "@types/node": "^22.15.21",
+    "@types/webextension-polyfill": "^0.12.5",
     "esbuild": "^0.25.4",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4",
     "web-ext": "^10.1.0"
   },
-  "license": "MPL-2.0"
+  "license": "MPL-2.0",
+  "dependencies": {
+    "webextension-polyfill": "^0.12.0"
+  }
 }
