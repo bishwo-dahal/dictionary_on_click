@@ -6,7 +6,7 @@ import {
 } from "../shared/languages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
-import { isLookupResponse } from "../shared/messages.js";
+import { isLookupEnrichmentMessage, isLookupRefreshMessage, isLookupResponse } from "../shared/messages.js";
 import type { ThemeMode } from "../shared/theme.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { groupDefinitionsByPos } from "../shared/definition-display.js";
@@ -24,6 +24,7 @@ import {
 import type { LookupResult, UserSettings } from "../shared/types.js";
 
 const REPORT_KEY = "brokenWordReports";
+let activeRequestId: string | null = null;
 
 const form = document.getElementById("lookup-form") as HTMLFormElement;
 const wordInput = document.getElementById("word-input") as HTMLInputElement;
@@ -194,6 +195,46 @@ function renderSuccess(result: LookupResult): void {
   resultEl.append(card);
 }
 
+function applyEnrichment(
+  synonyms: readonly string[],
+  antonyms: readonly string[],
+  translations: LookupResult["translations"],
+): void {
+  const card = resultEl.querySelector(".result-card");
+  if (!card) {
+    return;
+  }
+
+  for (const section of card.querySelectorAll(
+    ".related-words-section, .translations-section",
+  )) {
+    section.remove();
+  }
+
+  const actions = card.querySelector(".result-actions");
+  const fragment = document.createDocumentFragment();
+
+  for (const section of createRelatedWordsSections(synonyms, antonyms)) {
+    fragment.append(section);
+  }
+
+  if (translations.length > 0) {
+    const block = createTranslationsSection(
+      translations,
+      translations[0]!.language,
+    );
+    if (block) {
+      fragment.append(block);
+    }
+  }
+
+  if (actions) {
+    actions.before(fragment);
+  } else {
+    card.append(fragment);
+  }
+}
+
 function renderError(message: string, word: string): void {
   resultEl.className = "result result--error";
   resultEl.replaceChildren();
@@ -222,13 +263,20 @@ async function runLookup(): Promise<void> {
   resultEl.className = "result result--loading";
   resultEl.textContent = "Looking up…";
 
+  const requestId = crypto.randomUUID();
+  activeRequestId = requestId;
+
   const response = await send({
     type: "lookup",
     word,
     language: languageSelect.value as DictionaryLanguageId,
-    requestId: crypto.randomUUID(),
+    requestId,
     singleToken: !word.includes(" "),
   });
+
+  if (requestId !== activeRequestId) {
+    return;
+  }
 
   if (!isLookupResponse(response)) {
     renderError("Unexpected response from extension.", word);
@@ -276,6 +324,23 @@ async function init(): Promise<void> {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     void runLookup();
+  });
+
+  browser.runtime.onMessage.addListener((message: unknown) => {
+    if (
+      !isLookupEnrichmentMessage(message) &&
+      !isLookupRefreshMessage(message)
+    ) {
+      return;
+    }
+    if (message.requestId !== activeRequestId) {
+      return;
+    }
+    if (isLookupEnrichmentMessage(message)) {
+      applyEnrichment(message.synonyms, message.antonyms, message.translations);
+      return;
+    }
+    renderSuccess(message.result);
   });
 
   languageSelect.addEventListener("change", () => {

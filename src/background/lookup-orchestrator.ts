@@ -32,6 +32,8 @@ export interface LookupRequest {
   /** Prefetch is lower priority and yields to in-flight lookups. */
   prefetch?: boolean;
   singleToken?: boolean;
+  /** When true, skip the cache provider (used for stale revalidation). */
+  skipCache?: boolean;
 }
 
 interface ActiveSession {
@@ -160,6 +162,10 @@ export class LookupOrchestrator {
             }
 
             if (!isProviderAvailable(provider.id)) {
+              continue;
+            }
+
+            if (req.skipCache && provider.id === "cache") {
               continue;
             }
 

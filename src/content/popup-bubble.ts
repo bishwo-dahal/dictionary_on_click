@@ -37,6 +37,7 @@ export class DefinitionBubble {
   private onDismiss: (() => void) | null = null;
   private themeBound = false;
   private meaningsExpanded = false;
+  private lastAnchor: BubbleAnchor | null = null;
 
   showLoading(word: string, anchor: BubbleAnchor): void {
     this.meaningsExpanded = false;
@@ -67,12 +68,63 @@ export class DefinitionBubble {
   }
 
   showResult(response: LookupResponse, anchor: BubbleAnchor): void {
+    this.lastAnchor = anchor;
     this.mount(anchor);
     if (!this.card) {
       return;
     }
 
     void this.populateResult(response, anchor);
+  }
+
+  applyEnrichment(
+    synonyms: readonly string[],
+    antonyms: readonly string[],
+    translations: LookupResult["translations"],
+  ): void {
+    if (!this.card) {
+      return;
+    }
+
+    for (const section of this.card.querySelectorAll(
+      ".related-words-section, .translations-section",
+    )) {
+      section.remove();
+    }
+
+    const actions = this.card.querySelector(".actions");
+    const fragment = document.createDocumentFragment();
+
+    for (const section of createRelatedWordsSections(synonyms, antonyms)) {
+      fragment.append(section);
+    }
+
+    if (translations.length > 0) {
+      const block = createTranslationsSection(
+        translations,
+        translations[0]!.language,
+      );
+      if (block) {
+        fragment.append(block);
+      }
+    }
+
+    if (actions) {
+      actions.before(fragment);
+    } else {
+      this.card.append(fragment);
+    }
+
+    if (this.lastAnchor) {
+      this.reposition(this.lastAnchor);
+    }
+  }
+
+  applyRefresh(result: LookupResult): void {
+    if (!this.lastAnchor) {
+      return;
+    }
+    this.showResult({ ok: true, result }, this.lastAnchor);
   }
 
   dismiss(): void {
@@ -86,6 +138,7 @@ export class DefinitionBubble {
     this.card = null;
     this.themeBound = false;
     this.meaningsExpanded = false;
+    this.lastAnchor = null;
     this.onDismiss?.();
     this.onDismiss = null;
   }

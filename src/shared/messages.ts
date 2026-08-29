@@ -5,7 +5,7 @@ import type {
   ProviderHealthInfo,
   TelemetrySnapshot,
 } from "./telemetry-types.js";
-import type { LookupResponse, UserSettings } from "./types.js";
+import type { LookupResponse, LookupResult, Translation, UserSettings } from "./types.js";
 
 export type { BrokenWordReport, HistoryEntry, ProviderHealthInfo, TelemetrySnapshot };
 
@@ -54,6 +54,42 @@ export type BackgroundResponse =
   | { type: "pronunciationTts" }
   | { type: "ok" }
   | { type: "pong" };
+
+/** Background → UI push when translations/synonyms finish loading after the definition. */
+export type LookupEnrichmentMessage = {
+  type: "lookupEnrichment";
+  requestId: string;
+  translations: Translation[];
+  synonyms: string[];
+  antonyms: string[];
+};
+
+/** Background → UI push when a stale cached definition is refreshed. */
+export type LookupRefreshMessage = {
+  type: "lookupRefresh";
+  requestId: string;
+  result: LookupResult;
+};
+
+export function isLookupEnrichmentMessage(
+  message: unknown,
+): message is LookupEnrichmentMessage {
+  return (
+    typeof message === "object" &&
+    message !== null &&
+    (message as { type?: string }).type === "lookupEnrichment"
+  );
+}
+
+export function isLookupRefreshMessage(
+  message: unknown,
+): message is LookupRefreshMessage {
+  return (
+    typeof message === "object" &&
+    message !== null &&
+    (message as { type?: string }).type === "lookupRefresh"
+  );
+}
 
 export function isLookupResponse(
   response: BackgroundResponse,

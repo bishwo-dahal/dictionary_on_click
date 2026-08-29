@@ -1,4 +1,8 @@
 import type { DictionaryLanguageId } from "../shared/languages.js";
+import {
+  isLookupEnrichmentMessage,
+  isLookupRefreshMessage,
+} from "../shared/messages.js";
 import { getSettings, lookupWord } from "./messaging.js";
 import { DefinitionBubble, type BubbleAnchor } from "./popup-bubble.js";
 
@@ -20,6 +24,7 @@ export async function initContentController(): Promise<void> {
   });
 
   installDismissListeners();
+  installPushListeners();
 }
 
 export function anchorFromEvent(event: MouseEvent): BubbleAnchor {
@@ -82,6 +87,31 @@ export function dismissBubble(): void {
 
 export function isBubbleVisible(): boolean {
   return bubble.isVisible();
+}
+
+function installPushListeners(): void {
+  browser.runtime.onMessage.addListener((message: unknown) => {
+    if (
+      !isLookupEnrichmentMessage(message) &&
+      !isLookupRefreshMessage(message)
+    ) {
+      return;
+    }
+    if (message.requestId !== activeRequestId || !bubble.isVisible()) {
+      return;
+    }
+
+    if (isLookupEnrichmentMessage(message)) {
+      bubble.applyEnrichment(
+        message.synonyms,
+        message.antonyms,
+        message.translations,
+      );
+      return;
+    }
+
+    bubble.applyRefresh(message.result);
+  });
 }
 
 function installDismissListeners(): void {

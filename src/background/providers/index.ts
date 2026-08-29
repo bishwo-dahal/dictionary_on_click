@@ -14,5 +14,11 @@ export function createDefaultProviders(): LookupProvider[] {
   ];
 }
 
-export { saveToCache } from "./cache.js";
+export {
+  cacheKey,
+  enrichmentMatchesSettings,
+  readEnrichment,
+  saveEnrichment,
+  saveToCache,
+} from "./cache.js";
 export { datamuseSpellSuggest } from "./datamuse.js";

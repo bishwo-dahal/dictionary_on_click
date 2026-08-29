@@ -2,13 +2,17 @@ import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.j
 import type { BrokenWordReport } from "../shared/telemetry-types.js";
 import type Browser from "webextension-polyfill";
 import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
-import { isEnglishDictionary, shouldFetchTranslations } from "../shared/languages.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
-import { fetchDatamuseRelated } from "./datamuse-related.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
+import {
+  applyCachedEnrichmentFromStore,
+  needsAsyncEnrichment,
+  prepareLookupResultForResponse,
+  scheduleCacheRevalidation,
+  scheduleLookupEnrichment,
+} from "./lookup-enrichment.js";
 import { getProviderHealth } from "./health.js";
 import { resolvePronunciationAudio } from "./pronunciation.js";
-import { fetchWiktionaryEnrichment } from "./wiktionary-enrichment.js";
 import {
   clearTelemetry,
   getTelemetry,
@@ -19,8 +23,6 @@ import {
 
 const SETTINGS_KEY = "userSettings";
 const REPORT_KEY = "brokenWordReports";
-const TRANSLATION_FETCH_MS = 3_000;
-const ENRICHMENT_FETCH_MS = 3_500;
 const orchestrator = getLookupOrchestrator();
 
 async function loadSettings(): Promise<UserSettings> {
@@ -42,8 +44,8 @@ async function getBrokenReports(): Promise<BrokenWordReport[]> {
 }
 
 browser.runtime.onMessage.addListener(
-  (message: BackgroundRequest, _sender): Promise<BackgroundResponse> => {
-    return handleMessage(message);
+  (message: BackgroundRequest, sender): Promise<BackgroundResponse> => {
+    return handleMessage(message, sender);
   },
 );
 
@@ -89,7 +91,10 @@ async function handleExternalMessage(
   throw new Error("Unknown external message type");
 }
 
-async function handleMessage(message: BackgroundRequest): Promise<BackgroundResponse> {
+async function handleMessage(
+  message: BackgroundRequest,
+  sender: Browser.Runtime.MessageSender,
+): Promise<BackgroundResponse> {
   switch (message.type) {
     case "ping":
       return { type: "pong" };
@@ -153,6 +158,7 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
       const settings = await loadSettings();
       const language = message.language ?? settings.dictionaryLanguage;
       const start = performance.now();
+      const tabId = sender.tab?.id;
 
       const response = await orchestrator.lookup({
         word: message.word,
@@ -163,73 +169,32 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
       });
 
       if (response.ok && message.type === "lookup") {
-        response.result.translations = [];
-        response.result.synonyms = response.result.synonyms ?? [];
-        response.result.antonyms = response.result.antonyms ?? [];
+        let result = await applyCachedEnrichmentFromStore(
+          response.result,
+          settings,
+          language,
+        );
+        result = prepareLookupResultForResponse(result, settings, language);
+        response.result = result;
 
-        const fetchTranslations =
-          settings.translationsEnabled &&
-          shouldFetchTranslations(language, settings.targetLanguage);
-        const fetchSynAnt = settings.synonymsAntonymsEnabled;
-
-        const priorSynonyms = response.result.synonyms ?? [];
-        const priorAntonyms = response.result.antonyms ?? [];
-
-        if (fetchTranslations || fetchSynAnt) {
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), ENRICHMENT_FETCH_MS);
-          try {
-            const enriched = await fetchWiktionaryEnrichment(
-              response.result.word,
-              language,
-              {
-                targetLanguage: fetchTranslations ? settings.targetLanguage : null,
-                synonymsAntonyms: fetchSynAnt,
-              },
-              controller.signal,
-            );
-            if (fetchTranslations) {
-              response.result.translations = enriched.translations;
-            }
-            if (fetchSynAnt) {
-              response.result.synonyms =
-                enriched.synonyms.length > 0 ? enriched.synonyms : priorSynonyms;
-              response.result.antonyms =
-                enriched.antonyms.length > 0 ? enriched.antonyms : priorAntonyms;
-            }
-          } catch {
-            if (fetchTranslations) {
-              response.result.translations = [];
-            }
-            if (fetchSynAnt) {
-              response.result.synonyms = priorSynonyms;
-              response.result.antonyms = priorAntonyms;
-            }
-          } finally {
-            clearTimeout(timer);
-          }
+        if (needsAsyncEnrichment(result, settings, language)) {
+          scheduleLookupEnrichment({
+            requestId: message.requestId,
+            result,
+            language,
+            settings,
+            tabId,
+          });
         }
 
-        if (
-          fetchSynAnt &&
-          isEnglishDictionary(language) &&
-          response.result.synonyms.length === 0 &&
-          response.result.antonyms.length === 0
-        ) {
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_MS);
-          try {
-            const related = await fetchDatamuseRelated(
-              response.result.word,
-              controller.signal,
-            );
-            response.result.synonyms = related.synonyms;
-            response.result.antonyms = related.antonyms;
-          } catch {
-            // Keep any FDA-provided related words on the result.
-          } finally {
-            clearTimeout(timer);
-          }
+        if (result.stale && typeof navigator !== "undefined" && navigator.onLine) {
+          scheduleCacheRevalidation({
+            requestId: message.requestId,
+            word: result.word,
+            language,
+            settings,
+            tabId,
+          });
         }
       } else if (response.ok) {
         response.result.translations = [];
