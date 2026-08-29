@@ -11,16 +11,12 @@ import {
 import { createRelatedWordsSections } from "../shared/render-related-words.js";
 import { createTranslationsSection } from "../shared/render-translations.js";
 import { getSettings } from "./messaging.js";
+import type { BubbleAnchor } from "./selection-anchor.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
 
 const FAILSAFE_MS = 15_000;
 const REPORT_KEY = "brokenWordReports";
-
-export interface BubbleAnchor {
-  x: number;
-  y: number;
-}
 
 interface ReportEntry {
   timestamp: number;
@@ -125,6 +121,11 @@ export class DefinitionBubble {
       return;
     }
     this.showResult({ ok: true, result }, this.lastAnchor);
+  }
+
+  updateAnchor(anchor: BubbleAnchor): void {
+    this.lastAnchor = anchor;
+    this.reposition(anchor);
   }
 
   dismiss(): void {
