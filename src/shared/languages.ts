@@ -168,7 +168,7 @@ export function defaultTranslationTarget(
 
 /** Compliant User-Agent for Wikimedia API requests. */
 export const WIKIMEDIA_USER_AGENT =
-  "DictionaryOnClick/0.1.2 (browser extension; https://github.com/bishwo-dahal/dictionary-on-click)";
+  "DictionaryOnClick/0.2.0 (browser extension; https://github.com/bishwo-dahal/dictionary-on-click)";
 
 export function isEnglishDictionary(id: DictionaryLanguageId): boolean {
   return id === "en-us" || id === "en-uk";
