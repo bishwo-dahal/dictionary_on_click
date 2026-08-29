@@ -4,13 +4,13 @@ import { freeDictionaryProvider } from "./free-dictionary.js";
 import type { LookupProvider } from "./types.js";
 import { wiktionaryActionProvider, wiktionaryRestProvider } from "./wiktionary.js";
 
-/** Default provider chain: cache → Wiktionary → Free Dictionary → Datamuse. */
+/** Default provider chain: cache → Free Dictionary → Wiktionary → Datamuse. */
 export function createDefaultProviders(): LookupProvider[] {
   return [
     cacheProvider,
+    freeDictionaryProvider,
     wiktionaryRestProvider,
     wiktionaryActionProvider,
-    freeDictionaryProvider,
     datamuseProvider,
   ];
 }

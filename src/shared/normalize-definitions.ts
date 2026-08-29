@@ -56,15 +56,6 @@ export function splitEmbeddedPartOfSpeech(def: Definition): Definition {
     };
   }
 
-  const spaceMatch = trimmed.match(/^([a-z]{1,12})\s+(.+)$/i);
-  if (spaceMatch && isPosToken(spaceMatch[1]!)) {
-    return {
-      ...def,
-      partOfSpeech: spaceMatch[1]!.toLowerCase(),
-      text: spaceMatch[2]!.trim(),
-    };
-  }
-
   return def;
 }
 

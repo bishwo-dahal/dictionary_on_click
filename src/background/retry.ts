@@ -6,7 +6,7 @@ export const MAX_PROVIDER_ATTEMPTS = 3;
 export const BASE_BACKOFF_MS = 400;
 
 export function isBackoffError(code: LookupErrorCode): boolean {
-  return code === "RATE_LIMIT" || code === "API_ERROR" || code === "TIMEOUT";
+  return code === "RATE_LIMIT" || code === "API_ERROR";
 }
 
 export function backoffDelayMs(attempt: number, retryAfterSec?: number): number {

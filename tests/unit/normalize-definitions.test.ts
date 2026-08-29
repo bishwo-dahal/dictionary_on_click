@@ -30,17 +30,6 @@ describe("splitEmbeddedPartOfSpeech", () => {
     });
   });
 
-  it("splits legacy space-separated abbreviations", () => {
-    expect(
-      splitEmbeddedPartOfSpeech({
-        text: "adj Various, assorted, diverse.",
-      }),
-    ).toEqual({
-      partOfSpeech: "adj",
-      text: "Various, assorted, diverse.",
-    });
-  });
-
   it("does not split normal sentences", () => {
     const def = { text: "The quick brown fox" };
     expect(splitEmbeddedPartOfSpeech(def)).toEqual(def);
