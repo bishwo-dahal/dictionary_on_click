@@ -24,6 +24,7 @@ interface ProviderState {
 
 const PROVIDER_LABELS: Record<ProviderId, string> = {
   cache: "Local cache",
+  "english-parallel": "English providers (parallel)",
   "wiktionary-rest": "Wiktionary REST",
   "wiktionary-action": "Wiktionary API",
   "free-dictionary": "Free Dictionary API",

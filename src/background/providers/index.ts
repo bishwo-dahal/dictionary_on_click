@@ -1,19 +1,24 @@
 import { cacheProvider } from "./cache.js";
 import { datamuseProvider } from "./datamuse.js";
-import { freeDictionaryProvider } from "./free-dictionary.js";
+import { englishParallelProvider } from "./english-parallel.js";
 import type { LookupProvider } from "./types.js";
-import { wiktionaryActionProvider, wiktionaryRestProvider } from "./wiktionary.js";
+import { wiktionaryActionProvider } from "./wiktionary.js";
 
-/** Default provider chain: cache → Wiktionary → Free Dictionary → Datamuse. */
+/** Default provider chain: cache → English race → Wiktionary action → Datamuse. */
 export function createDefaultProviders(): LookupProvider[] {
   return [
     cacheProvider,
-    wiktionaryRestProvider,
+    englishParallelProvider,
     wiktionaryActionProvider,
-    freeDictionaryProvider,
     datamuseProvider,
   ];
 }
 
-export { saveToCache } from "./cache.js";
+export {
+  cacheKey,
+  enrichmentMatchesSettings,
+  readEnrichment,
+  saveEnrichment,
+  saveToCache,
+} from "./cache.js";
 export { datamuseSpellSuggest } from "./datamuse.js";

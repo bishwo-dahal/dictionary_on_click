@@ -5,6 +5,8 @@ import type { LookupProvider, ProviderOutcome } from "./types.js";
 
 interface FdaMeaning {
   partOfSpeech?: string;
+  synonyms?: string[];
+  antonyms?: string[];
   definitions?: Array<{
     definition?: string;
     example?: string;
@@ -69,8 +71,28 @@ export const freeDictionaryProvider: LookupProvider = {
 
     const entry = res.data[0]!;
     const definitions: Definition[] = [];
+    const synonyms: string[] = [];
+    const antonyms: string[] = [];
+    const seenSyn = new Set<string>();
+    const seenAnt = new Set<string>();
 
     for (const meaning of entry.meanings ?? []) {
+      for (const synonym of meaning.synonyms ?? []) {
+        const text = synonym.trim();
+        const key = text.toLowerCase();
+        if (text && !seenSyn.has(key)) {
+          seenSyn.add(key);
+          synonyms.push(text);
+        }
+      }
+      for (const antonym of meaning.antonyms ?? []) {
+        const text = antonym.trim();
+        const key = text.toLowerCase();
+        if (text && !seenAnt.has(key)) {
+          seenAnt.add(key);
+          antonyms.push(text);
+        }
+      }
       for (const d of meaning.definitions ?? []) {
         if (!d.definition?.trim()) {
           continue;
@@ -95,6 +117,8 @@ export const freeDictionaryProvider: LookupProvider = {
       language,
       definitions,
       translations: [],
+      synonyms: synonyms.slice(0, 8),
+      antonyms: antonyms.slice(0, 8),
       sourceUrl: entry.sourceUrls?.[0] ?? `https://en.wiktionary.org/wiki/${encodeURIComponent(word)}`,
       provider: "free-dictionary",
       ...pronunciation,

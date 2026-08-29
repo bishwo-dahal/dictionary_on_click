@@ -1,0 +1,19 @@
+==French==
+
+===Etymology===
+From Old French.
+
+===Interjection===
+{{fr-interj}}
+
+# A greeting; [[hello]].
+
+====Translations====
+{{trans-top|greeting}}
+* {{t+|en|hello}}
+* {{t+|en|hi}}
+* {{t+|es|hola}}
+* {{t+|de|hallo}}
+{{trans-bottom}}
+
+==References==

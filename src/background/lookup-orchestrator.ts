@@ -5,6 +5,7 @@ import {
   isRetryable,
   type LookupErrorCode,
 } from "../shared/errors.js";
+import { normalizeDefinitions } from "../shared/normalize-definitions.js";
 import type { LookupFailure, LookupResponse, LookupResult } from "../shared/types.js";
 import { generateVariants, normalizeInput } from "./normalize.js";
 import { isProviderAvailable, recordProviderOutcome } from "./health.js";
@@ -31,6 +32,8 @@ export interface LookupRequest {
   /** Prefetch is lower priority and yields to in-flight lookups. */
   prefetch?: boolean;
   singleToken?: boolean;
+  /** When true, skip the cache provider (used for stale revalidation). */
+  skipCache?: boolean;
 }
 
 interface ActiveSession {
@@ -56,6 +59,13 @@ function failure(
     word,
     language,
     retryable: isRetryable(code),
+  };
+}
+
+function finalizeResult(result: LookupResult): LookupResult {
+  return {
+    ...result,
+    definitions: normalizeDefinitions(result.definitions),
   };
 }
 
@@ -134,71 +144,83 @@ export class LookupOrchestrator {
     const budgetTimer = setTimeout(() => session.abort.abort(), TOTAL_LOOKUP_BUDGET_MS);
 
     try {
-      const variants = [...generateVariants(normalized)];
-      const spell = await datamuseSpellSuggest(normalized, req.language, signal);
-      if (spell && !variants.includes(spell)) {
-        variants.push(spell);
-      }
-
       const errors: LookupErrorCode[] = [];
-      let staleHit: LookupResult | null = null;
 
-      for (const variant of variants) {
-        if (this.isStale(req)) {
-          return failure("CANCELLED", normalized, req.language);
+      const tryVariants = async (variantList: string[]): Promise<LookupResponse | null> => {
+        for (const variant of variantList) {
+          if (this.isStale(req)) {
+            return failure("CANCELLED", normalized, req.language);
+          }
+
+          for (const provider of this.providers) {
+            if (signal.aborted) {
+              if (this.isStale(req)) {
+                return failure("CANCELLED", normalized, req.language);
+              }
+              errors.push("TIMEOUT");
+              break;
+            }
+
+            if (!isProviderAvailable(provider.id)) {
+              continue;
+            }
+
+            if (req.skipCache && provider.id === "cache") {
+              continue;
+            }
+
+            const started = performance.now();
+            const outcome = await this.queryProvider(provider, variant, req.language, signal);
+            const latencyMs = performance.now() - started;
+
+            if (outcome.kind === "hit") {
+              recordProviderOutcome(provider.id, "ok", latencyMs);
+              const result = finalizeResult(outcome.result);
+              if (provider.id !== "cache") {
+                void saveToCache(result);
+              }
+              return { ok: true, result };
+            }
+
+            if (outcome.kind === "stale") {
+              recordProviderOutcome(provider.id, "ok", latencyMs);
+              const result = finalizeResult(outcome.result);
+              return {
+                ok: true,
+                result: { ...result, partial: true, stale: true },
+              };
+            }
+
+            if (outcome.kind === "miss") {
+              recordProviderOutcome(provider.id, "miss", latencyMs);
+              continue;
+            }
+
+            if (outcome.kind === "error") {
+              recordProviderOutcome(provider.id, "fail", latencyMs, outcome.code);
+              errors.push(outcome.code);
+              if (outcome.code === "OFFLINE") {
+                return failure("OFFLINE", normalized, req.language);
+              }
+            }
+          }
         }
 
-        for (const provider of this.providers) {
-          if (signal.aborted) {
-            if (this.isStale(req)) {
-              return failure("CANCELLED", normalized, req.language);
-            }
-            errors.push("TIMEOUT");
-            break;
-          }
+        return null;
+      };
 
-          if (!isProviderAvailable(provider.id)) {
-            continue;
-          }
-
-          const started = performance.now();
-          const outcome = await this.queryProvider(provider, variant, req.language, signal);
-          const latencyMs = performance.now() - started;
-
-          if (outcome.kind === "hit") {
-            recordProviderOutcome(provider.id, "ok", latencyMs);
-            if (provider.id !== "cache") {
-              void saveToCache(outcome.result);
-            }
-            return { ok: true, result: outcome.result };
-          }
-
-          if (outcome.kind === "stale") {
-            recordProviderOutcome(provider.id, "ok", latencyMs);
-            staleHit = outcome.result;
-            continue;
-          }
-
-          if (outcome.kind === "miss") {
-            recordProviderOutcome(provider.id, "miss", latencyMs);
-            continue;
-          }
-
-          if (outcome.kind === "error") {
-            recordProviderOutcome(provider.id, "fail", latencyMs, outcome.code);
-            errors.push(outcome.code);
-            if (outcome.code === "OFFLINE") {
-              return failure("OFFLINE", normalized, req.language);
-            }
-          }
-        }
+      const primaryVariants = generateVariants(normalized);
+      const primaryResult = await tryVariants(primaryVariants);
+      if (primaryResult) {
+        return primaryResult;
       }
 
-      if (staleHit) {
-        return {
-          ok: true,
-          result: { ...staleHit, partial: true, stale: true },
-        };
+      const spell = await datamuseSpellSuggest(normalized, req.language, signal);
+      if (spell && !primaryVariants.includes(spell)) {
+        const spellResult = await tryVariants([spell]);
+        if (spellResult) {
+          return spellResult;
+        }
       }
 
       if (isOffline() && errors.length === 0) {

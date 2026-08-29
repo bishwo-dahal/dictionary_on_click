@@ -1,33 +1,79 @@
-import { LANGUAGES, getLanguageLabel } from "../shared/languages.js";
-import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
-import { isLookupResponse } from "../shared/messages.js";
+import {
+  defaultTranslationTarget,
+  getLanguageLabel,
+  LANGUAGES,
+  shouldFetchTranslations,
+} from "../shared/languages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
+import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
+import { isLookupEnrichmentMessage, isLookupRefreshMessage, isLookupResponse } from "../shared/messages.js";
 import type { ThemeMode } from "../shared/theme.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { groupDefinitionsByPos } from "../shared/definition-display.js";
 import { createHeadwordHeader } from "../shared/headword-header.js";
 import { markReportButtonDone } from "../shared/pos.js";
 import { createPosGroup } from "../shared/render-definitions.js";
-import type { LookupResult } from "../shared/types.js";
+import {
+  createRelatedWordsSections,
+  formatRelatedWordsForCopy,
+} from "../shared/render-related-words.js";
+import {
+  createTranslationsSection,
+  formatTranslationsForCopy,
+} from "../shared/render-translations.js";
+import type { LookupResult, UserSettings } from "../shared/types.js";
 
 const REPORT_KEY = "brokenWordReports";
+let activeRequestId: string | null = null;
 
 const form = document.getElementById("lookup-form") as HTMLFormElement;
 const wordInput = document.getElementById("word-input") as HTMLInputElement;
 const languageSelect = document.getElementById(
   "language-select",
 ) as HTMLSelectElement;
+const translationsEnabledCheck = document.getElementById(
+  "translations-enabled",
+) as HTMLInputElement;
+const synonymsAntonymsEnabledCheck = document.getElementById(
+  "synonyms-antonyms-enabled",
+) as HTMLInputElement;
+const targetLanguageSelect = document.getElementById(
+  "target-language-select",
+) as HTMLSelectElement;
+const translationTargetLabel = document.getElementById(
+  "translation-target-label",
+) as HTMLLabelElement;
 const resultEl = document.getElementById("result") as HTMLDivElement;
 const openOptions = document.getElementById("open-options") as HTMLAnchorElement;
 const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
 
 function populateLanguages(): void {
   for (const lang of LANGUAGES) {
-    const opt = document.createElement("option");
-    opt.value = lang.id;
-    opt.textContent = lang.label;
-    languageSelect.appendChild(opt);
+    const dictOpt = document.createElement("option");
+    dictOpt.value = lang.id;
+    dictOpt.textContent = lang.label;
+    languageSelect.appendChild(dictOpt);
+
+    const targetOpt = document.createElement("option");
+    targetOpt.value = lang.id;
+    targetOpt.textContent = lang.label;
+    targetLanguageSelect.appendChild(targetOpt);
   }
+}
+
+function syncTranslationControls(enabled: boolean): void {
+  translationTargetLabel.hidden = !enabled;
+  targetLanguageSelect.disabled = !enabled;
+}
+
+function ensureTranslationTarget(
+  dictionaryLanguage: DictionaryLanguageId,
+  targetLanguage: DictionaryLanguageId,
+): DictionaryLanguageId {
+  if (!shouldFetchTranslations(dictionaryLanguage, targetLanguage)) {
+    return defaultTranslationTarget(dictionaryLanguage);
+  }
+  return targetLanguage;
 }
 
 async function send(message: BackgroundRequest): Promise<BackgroundResponse> {
@@ -57,7 +103,9 @@ function createActions(result: LookupResult): HTMLDivElement {
       const pos = d.partOfSpeech ? `(${d.partOfSpeech}) ` : "";
       return `${pos}${d.text}`;
     });
-    void navigator.clipboard.writeText(`${result.word}\n\n${lines.join("\n\n")}`);
+    const translationBlock = formatTranslationsForCopy(result.translations);
+    const relatedBlock = formatRelatedWordsForCopy(result.synonyms, result.antonyms);
+    void navigator.clipboard.writeText(`${result.word}\n\n${lines.join("\n\n")}${translationBlock}${relatedBlock}`);
     copyBtn.textContent = "Copied";
     window.setTimeout(() => {
       copyBtn.textContent = "Copy";
@@ -129,10 +177,62 @@ function renderSuccess(result: LookupResult): void {
     card.append(empty);
   } else {
     card.append(createDefinitionsBody(result));
+    for (const section of createRelatedWordsSections(result.synonyms, result.antonyms)) {
+      card.append(section);
+    }
+    if (result.translations.length > 0) {
+      const translations = createTranslationsSection(
+        result.translations,
+        result.translations[0]!.language,
+      );
+      if (translations) {
+        card.append(translations);
+      }
+    }
     card.append(createActions(result));
   }
 
   resultEl.append(card);
+}
+
+function applyEnrichment(
+  synonyms: readonly string[],
+  antonyms: readonly string[],
+  translations: LookupResult["translations"],
+): void {
+  const card = resultEl.querySelector(".result-card");
+  if (!card) {
+    return;
+  }
+
+  for (const section of card.querySelectorAll(
+    ".related-words-section, .translations-section",
+  )) {
+    section.remove();
+  }
+
+  const actions = card.querySelector(".result-actions");
+  const fragment = document.createDocumentFragment();
+
+  for (const section of createRelatedWordsSections(synonyms, antonyms)) {
+    fragment.append(section);
+  }
+
+  if (translations.length > 0) {
+    const block = createTranslationsSection(
+      translations,
+      translations[0]!.language,
+    );
+    if (block) {
+      fragment.append(block);
+    }
+  }
+
+  if (actions) {
+    actions.before(fragment);
+  } else {
+    card.append(fragment);
+  }
 }
 
 function renderError(message: string, word: string): void {
@@ -163,13 +263,20 @@ async function runLookup(): Promise<void> {
   resultEl.className = "result result--loading";
   resultEl.textContent = "Looking up…";
 
+  const requestId = crypto.randomUUID();
+  activeRequestId = requestId;
+
   const response = await send({
     type: "lookup",
     word,
     language: languageSelect.value as DictionaryLanguageId,
-    requestId: crypto.randomUUID(),
+    requestId,
     singleToken: !word.includes(" "),
   });
+
+  if (requestId !== activeRequestId) {
+    return;
+  }
 
   if (!isLookupResponse(response)) {
     renderError("Unexpected response from extension.", word);
@@ -197,7 +304,21 @@ async function init(): Promise<void> {
   const response = await send({ type: "getSettings" });
   if (response.type === "settings") {
     languageSelect.value = response.settings.dictionaryLanguage;
+    const targetLanguage = ensureTranslationTarget(
+      response.settings.dictionaryLanguage,
+      response.settings.targetLanguage,
+    );
+    targetLanguageSelect.value = targetLanguage;
+    translationsEnabledCheck.checked = response.settings.translationsEnabled;
+    synonymsAntonymsEnabledCheck.checked = response.settings.synonymsAntonymsEnabled;
     themeSelect.value = response.settings.theme;
+    syncTranslationControls(response.settings.translationsEnabled);
+    if (targetLanguage !== response.settings.targetLanguage) {
+      void send({
+        type: "saveSettings",
+        settings: { targetLanguage },
+      });
+    }
   }
 
   form.addEventListener("submit", (e) => {
@@ -205,11 +326,74 @@ async function init(): Promise<void> {
     void runLookup();
   });
 
+  browser.runtime.onMessage.addListener((message: unknown) => {
+    if (
+      !isLookupEnrichmentMessage(message) &&
+      !isLookupRefreshMessage(message)
+    ) {
+      return;
+    }
+    if (message.requestId !== activeRequestId) {
+      return;
+    }
+    if (isLookupEnrichmentMessage(message)) {
+      applyEnrichment(message.synonyms, message.antonyms, message.translations);
+      return;
+    }
+    renderSuccess(message.result);
+  });
+
   languageSelect.addEventListener("change", () => {
+    const dictionaryLanguage = languageSelect.value as DictionaryLanguageId;
+    const settings: Partial<UserSettings> = { dictionaryLanguage };
+    if (translationsEnabledCheck.checked) {
+      const targetLanguage = ensureTranslationTarget(
+        dictionaryLanguage,
+        targetLanguageSelect.value as DictionaryLanguageId,
+      );
+      if (targetLanguage !== targetLanguageSelect.value) {
+        targetLanguageSelect.value = targetLanguage;
+        settings.targetLanguage = targetLanguage;
+      }
+    }
+    void send({
+      type: "saveSettings",
+      settings,
+    });
+  });
+
+  translationsEnabledCheck.addEventListener("change", () => {
+    const enabled = translationsEnabledCheck.checked;
+    syncTranslationControls(enabled);
+    const settings: Partial<UserSettings> = { translationsEnabled: enabled };
+    if (enabled) {
+      const targetLanguage = ensureTranslationTarget(
+        languageSelect.value as DictionaryLanguageId,
+        targetLanguageSelect.value as DictionaryLanguageId,
+      );
+      if (targetLanguage !== targetLanguageSelect.value) {
+        targetLanguageSelect.value = targetLanguage;
+        settings.targetLanguage = targetLanguage;
+      }
+    }
+    void send({
+      type: "saveSettings",
+      settings,
+    });
+  });
+
+  synonymsAntonymsEnabledCheck.addEventListener("change", () => {
+    void send({
+      type: "saveSettings",
+      settings: { synonymsAntonymsEnabled: synonymsAntonymsEnabledCheck.checked },
+    });
+  });
+
+  targetLanguageSelect.addEventListener("change", () => {
     void send({
       type: "saveSettings",
       settings: {
-        dictionaryLanguage: languageSelect.value as DictionaryLanguageId,
+        targetLanguage: targetLanguageSelect.value as DictionaryLanguageId,
       },
     });
   });

@@ -20,6 +20,8 @@ function hitProvider(
             language: "en-us",
             definitions: [{ text: "definition" }],
             translations: [],
+            synonyms: [],
+            antonyms: [],
             sourceUrl: "https://example.com",
             provider: id,
             ...result,
@@ -141,6 +143,48 @@ describe("LookupOrchestrator", () => {
     if (!res.ok) {
       expect(res.code).toBe("API_ERROR");
       expect(res.retryable).toBe(true);
+    }
+  });
+
+  it("skips cache when skipCache is set", async () => {
+    const cacheHits = vi.fn().mockResolvedValue({
+      kind: "hit",
+      result: {
+        word: "hello",
+        lemma: "hello",
+        language: "en-us",
+        definitions: [{ text: "cached" }],
+        translations: [],
+        synonyms: [],
+        antonyms: [],
+        sourceUrl: "https://example.com",
+        provider: "cache",
+      },
+    });
+
+    const cache: LookupProvider = {
+      id: "cache",
+      lookup: cacheHits,
+    };
+
+    const orch = new LookupOrchestrator([
+      cache,
+      hitProvider("wiktionary-rest", ["hello"], {
+        definitions: [{ text: "fresh" }],
+      }),
+    ]);
+
+    const res = await orch.lookup({
+      word: "hello",
+      language: "en-us",
+      requestId: "1",
+      skipCache: true,
+    });
+
+    expect(cacheHits).not.toHaveBeenCalled();
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.result.definitions[0]?.text).toBe("fresh");
     }
   });
 

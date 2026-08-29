@@ -1,6 +1,15 @@
 import type { DictionaryLanguageId } from "../shared/languages.js";
+import {
+  isLookupEnrichmentMessage,
+  isLookupRefreshMessage,
+} from "../shared/messages.js";
 import { getSettings, lookupWord } from "./messaging.js";
-import { DefinitionBubble, type BubbleAnchor } from "./popup-bubble.js";
+import { DefinitionBubble } from "./popup-bubble.js";
+import {
+  anchorFromSelectionRange,
+  getSelectionVisibility,
+  type BubbleAnchor,
+} from "./selection-anchor.js";
 
 let language: DictionaryLanguageId = "en-us";
 let activeRequestId: string | null = null;
@@ -20,6 +29,7 @@ export async function initContentController(): Promise<void> {
   });
 
   installDismissListeners();
+  installPushListeners();
 }
 
 export function anchorFromEvent(event: MouseEvent): BubbleAnchor {
@@ -27,18 +37,7 @@ export function anchorFromEvent(event: MouseEvent): BubbleAnchor {
 }
 
 export function anchorFromSelection(): BubbleAnchor | null {
-  const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0) {
-    return null;
-  }
-  const rect = sel.getRangeAt(0).getBoundingClientRect();
-  if (rect.width === 0 && rect.height === 0) {
-    return null;
-  }
-  return {
-    x: rect.left + rect.width / 2,
-    y: rect.bottom,
-  };
+  return anchorFromSelectionRange();
 }
 
 export async function runLookup(
@@ -84,6 +83,31 @@ export function isBubbleVisible(): boolean {
   return bubble.isVisible();
 }
 
+function installPushListeners(): void {
+  browser.runtime.onMessage.addListener((message: unknown) => {
+    if (
+      !isLookupEnrichmentMessage(message) &&
+      !isLookupRefreshMessage(message)
+    ) {
+      return;
+    }
+    if (message.requestId !== activeRequestId || !bubble.isVisible()) {
+      return;
+    }
+
+    if (isLookupEnrichmentMessage(message)) {
+      bubble.applyEnrichment(
+        message.synonyms,
+        message.antonyms,
+        message.translations,
+      );
+      return;
+    }
+
+    bubble.applyRefresh(message.result);
+  });
+}
+
 function installDismissListeners(): void {
   const shouldDismiss = (event: Event): void => {
     if (!bubble.isVisible()) {
@@ -121,7 +145,7 @@ function installDismissListeners(): void {
     true,
   );
 
-  document.addEventListener("scroll", () => dismissBubble(), true);
+  document.addEventListener("scroll", () => handleScrollWhileBubbleOpen(), true);
   window.addEventListener("blur", () => dismissBubble());
 
   document.addEventListener("selectionchange", () => {
@@ -133,4 +157,21 @@ function installDismissListeners(): void {
       dismissBubble();
     }
   });
+}
+
+function handleScrollWhileBubbleOpen(): void {
+  if (!bubble.isVisible()) {
+    return;
+  }
+
+  const visibility = getSelectionVisibility();
+  if (visibility !== "visible") {
+    dismissBubble();
+    return;
+  }
+
+  const anchor = anchorFromSelectionRange();
+  if (anchor) {
+    bubble.updateAnchor(anchor);
+  }
 }

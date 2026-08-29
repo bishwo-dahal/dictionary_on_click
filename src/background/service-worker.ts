@@ -4,6 +4,13 @@ import type Browser from "webextension-polyfill";
 import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
+import {
+  applyCachedEnrichmentFromStore,
+  needsAsyncEnrichment,
+  prepareLookupResultForResponse,
+  scheduleCacheRevalidation,
+  scheduleLookupEnrichment,
+} from "./lookup-enrichment.js";
 import { getProviderHealth } from "./health.js";
 import { resolvePronunciationAudio } from "./pronunciation.js";
 import {
@@ -37,8 +44,8 @@ async function getBrokenReports(): Promise<BrokenWordReport[]> {
 }
 
 browser.runtime.onMessage.addListener(
-  (message: BackgroundRequest, _sender): Promise<BackgroundResponse> => {
-    return handleMessage(message);
+  (message: BackgroundRequest, sender): Promise<BackgroundResponse> => {
+    return handleMessage(message, sender);
   },
 );
 
@@ -84,7 +91,10 @@ async function handleExternalMessage(
   throw new Error("Unknown external message type");
 }
 
-async function handleMessage(message: BackgroundRequest): Promise<BackgroundResponse> {
+async function handleMessage(
+  message: BackgroundRequest,
+  sender: Browser.Runtime.MessageSender,
+): Promise<BackgroundResponse> {
   switch (message.type) {
     case "ping":
       return { type: "pong" };
@@ -148,6 +158,7 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
       const settings = await loadSettings();
       const language = message.language ?? settings.dictionaryLanguage;
       const start = performance.now();
+      const tabId = sender.tab?.id;
 
       const response = await orchestrator.lookup({
         word: message.word,
@@ -156,6 +167,40 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
         prefetch: message.type === "prefetch",
         singleToken: message.singleToken,
       });
+
+      if (response.ok && message.type === "lookup") {
+        let result = await applyCachedEnrichmentFromStore(
+          response.result,
+          settings,
+          language,
+        );
+        result = prepareLookupResultForResponse(result, settings, language);
+        response.result = result;
+
+        if (needsAsyncEnrichment(result, settings, language)) {
+          scheduleLookupEnrichment({
+            requestId: message.requestId,
+            result,
+            language,
+            settings,
+            tabId,
+          });
+        }
+
+        if (result.stale && typeof navigator !== "undefined" && navigator.onLine) {
+          scheduleCacheRevalidation({
+            requestId: message.requestId,
+            word: result.word,
+            language,
+            settings,
+            tabId,
+          });
+        }
+      } else if (response.ok) {
+        response.result.translations = [];
+        response.result.synonyms = [];
+        response.result.antonyms = [];
+      }
 
       const durationMs = performance.now() - start;
 

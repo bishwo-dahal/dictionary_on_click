@@ -21,7 +21,7 @@
     "page": "options/index.html",
     "open_in_tab": true
   },
-  "permissions": ["storage"],
+  "permissions": ["storage", "tabs"],
   "web_accessible_resources": [
     {
       "resources": ["audio/speak.html"],

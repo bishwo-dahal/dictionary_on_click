@@ -8,17 +8,15 @@ import {
   createGlossList,
   createPosGroup,
 } from "../shared/render-definitions.js";
+import { createRelatedWordsSections } from "../shared/render-related-words.js";
+import { createTranslationsSection } from "../shared/render-translations.js";
 import { getSettings } from "./messaging.js";
+import type { BubbleAnchor } from "./selection-anchor.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
 
 const FAILSAFE_MS = 15_000;
 const REPORT_KEY = "brokenWordReports";
-
-export interface BubbleAnchor {
-  x: number;
-  y: number;
-}
 
 interface ReportEntry {
   timestamp: number;
@@ -35,6 +33,7 @@ export class DefinitionBubble {
   private onDismiss: (() => void) | null = null;
   private themeBound = false;
   private meaningsExpanded = false;
+  private lastAnchor: BubbleAnchor | null = null;
 
   showLoading(word: string, anchor: BubbleAnchor): void {
     this.meaningsExpanded = false;
@@ -65,12 +64,68 @@ export class DefinitionBubble {
   }
 
   showResult(response: LookupResponse, anchor: BubbleAnchor): void {
+    this.lastAnchor = anchor;
     this.mount(anchor);
     if (!this.card) {
       return;
     }
 
     void this.populateResult(response, anchor);
+  }
+
+  applyEnrichment(
+    synonyms: readonly string[],
+    antonyms: readonly string[],
+    translations: LookupResult["translations"],
+  ): void {
+    if (!this.card) {
+      return;
+    }
+
+    for (const section of this.card.querySelectorAll(
+      ".related-words-section, .translations-section",
+    )) {
+      section.remove();
+    }
+
+    const actions = this.card.querySelector(".actions");
+    const fragment = document.createDocumentFragment();
+
+    for (const section of createRelatedWordsSections(synonyms, antonyms)) {
+      fragment.append(section);
+    }
+
+    if (translations.length > 0) {
+      const block = createTranslationsSection(
+        translations,
+        translations[0]!.language,
+      );
+      if (block) {
+        fragment.append(block);
+      }
+    }
+
+    if (actions) {
+      actions.before(fragment);
+    } else {
+      this.card.append(fragment);
+    }
+
+    if (this.lastAnchor) {
+      this.reposition(this.lastAnchor);
+    }
+  }
+
+  applyRefresh(result: LookupResult): void {
+    if (!this.lastAnchor) {
+      return;
+    }
+    this.showResult({ ok: true, result }, this.lastAnchor);
+  }
+
+  updateAnchor(anchor: BubbleAnchor): void {
+    this.lastAnchor = anchor;
+    this.reposition(anchor);
   }
 
   dismiss(): void {
@@ -84,6 +139,7 @@ export class DefinitionBubble {
     this.card = null;
     this.themeBound = false;
     this.meaningsExpanded = false;
+    this.lastAnchor = null;
     this.onDismiss?.();
     this.onDismiss = null;
   }
@@ -150,6 +206,20 @@ export class DefinitionBubble {
         anchor,
       ),
     );
+
+    for (const section of createRelatedWordsSections(result.synonyms, result.antonyms)) {
+      this.card.append(section);
+    }
+
+    if (result.translations.length > 0) {
+      const translations = createTranslationsSection(
+        result.translations,
+        result.translations[0]!.language,
+      );
+      if (translations) {
+        this.card.append(translations);
+      }
+    }
 
     if (result.partial || result.stale) {
       const meta = document.createElement("p");
