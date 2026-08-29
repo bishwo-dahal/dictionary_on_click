@@ -1,15 +1,14 @@
 import { cacheProvider } from "./cache.js";
 import { datamuseProvider } from "./datamuse.js";
-import { freeDictionaryProvider } from "./free-dictionary.js";
+import { englishParallelProvider } from "./english-parallel.js";
 import type { LookupProvider } from "./types.js";
-import { wiktionaryActionProvider, wiktionaryRestProvider } from "./wiktionary.js";
+import { wiktionaryActionProvider } from "./wiktionary.js";
 
-/** Default provider chain: cache → Free Dictionary → Wiktionary → Datamuse. */
+/** Default provider chain: cache → English race → Wiktionary action → Datamuse. */
 export function createDefaultProviders(): LookupProvider[] {
   return [
     cacheProvider,
-    freeDictionaryProvider,
-    wiktionaryRestProvider,
+    englishParallelProvider,
     wiktionaryActionProvider,
     datamuseProvider,
   ];

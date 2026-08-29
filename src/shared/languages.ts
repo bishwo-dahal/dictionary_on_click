@@ -21,6 +21,7 @@ export type DictionaryLanguageId =
 
 export type ProviderId =
   | "cache"
+  | "english-parallel"
   | "wiktionary-rest"
   | "wiktionary-action"
   | "free-dictionary"

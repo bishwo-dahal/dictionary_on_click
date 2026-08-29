@@ -2,12 +2,12 @@ import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.j
 import type { BrokenWordReport } from "../shared/telemetry-types.js";
 import type Browser from "webextension-polyfill";
 import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
-import { shouldFetchTranslations, isEnglishDictionary } from "../shared/languages.js";
+import { isEnglishDictionary, shouldFetchTranslations } from "../shared/languages.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
+import { fetchDatamuseRelated } from "./datamuse-related.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
 import { getProviderHealth } from "./health.js";
 import { resolvePronunciationAudio } from "./pronunciation.js";
-import { fetchDatamuseRelated } from "./datamuse-related.js";
 import { fetchWiktionaryEnrichment } from "./wiktionary-enrichment.js";
 import {
   clearTelemetry,
