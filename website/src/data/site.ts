@@ -1,7 +1,7 @@
 export const site = {
   name: 'Dictionary on Click',
   url: 'https://dictionary-on-click.bishwodahal.com',
-  version: '0.1.2',
+  version: '0.2.0',
   author: 'Bishwo Dahal',
   description:
     'Look up word definitions without leaving the page. Double-click any word for a definition bubble. Free Firefox and Chrome extension with no API keys and local-only data.',

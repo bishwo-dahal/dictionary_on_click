@@ -1,6 +1,6 @@
 {
   "name": "dictionary-on-click",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Dictionary extension — double-click any word for definitions",
   "private": true,
   "type": "module",
