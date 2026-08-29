@@ -59,6 +59,8 @@ export type BubblePreviewPerPos = 1 | 2 | 3;
 export interface UserSettings {
   dictionaryLanguage: DictionaryLanguageId;
   targetLanguage: DictionaryLanguageId;
+  /** When false, no Wiktionary gloss fetch or translation UI (default). */
+  translationsEnabled: boolean;
   theme: ThemeMode;
   /** Collapsed double-click bubble: max meanings before "+ more". Prefers diverse parts of speech (POS) when possible. */
   bubblePreviewMax: BubblePreviewMax;
@@ -72,6 +74,7 @@ export interface UserSettings {
 export const DEFAULT_SETTINGS: UserSettings = {
   dictionaryLanguage: "en-us",
   targetLanguage: "en-us",
+  translationsEnabled: false,
   theme: "system",
   bubblePreviewMax: 3,
   bubblePreviewPerPos: 1,

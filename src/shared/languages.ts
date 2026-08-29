@@ -72,6 +72,99 @@ export function wiktionaryHost(wikiCode: string): string {
   return `https://${wikiCode}.wiktionary.org`;
 }
 
+/** Wiktionary `{{t|…}}` template language code for a dictionary language id. */
+export function toWiktionaryTranslationCode(id: DictionaryLanguageId): string {
+  switch (id) {
+    case "en-us":
+    case "en-uk":
+      return "en";
+    case "pt-br":
+      return "pt";
+    case "zh-hans":
+      return "zh";
+    case "zh-hant":
+      return "zh-Hant";
+    default:
+      return getLanguage(id).wikiCode;
+  }
+}
+
+/** Wiktionary template language codes that satisfy a translation target. */
+export function translationCodesForTarget(id: DictionaryLanguageId): readonly string[] {
+  switch (id) {
+    case "zh-hans":
+      return ["zh", "cmn"];
+    case "zh-hant":
+      return ["zh-hant", "zh", "cmn"];
+    default: {
+      const code = toWiktionaryTranslationCode(id).toLowerCase();
+      return code === "zh-hant" ? ["zh-hant", "zh", "cmn"] : [code];
+    }
+  }
+}
+
+/** Whether gloss lookup should run for this dictionary/target pair. */
+export function shouldFetchTranslations(
+  dictionary: DictionaryLanguageId,
+  target: DictionaryLanguageId,
+): boolean {
+  if (dictionary === target) {
+    return false;
+  }
+
+  const dictWiki = getLanguage(dictionary).wikiCode;
+  const targetWiki = getLanguage(target).wikiCode;
+  if (dictWiki === targetWiki) {
+    return false;
+  }
+
+  return true;
+}
+
+/** Sensible default target when dictionary and target would be equivalent. */
+export function defaultTranslationTarget(
+  dictionary: DictionaryLanguageId,
+): DictionaryLanguageId {
+  const dictWiki = getLanguage(dictionary).wikiCode;
+  if (dictWiki !== "en") {
+    for (const english of ["en-us", "en-uk"] as const) {
+      if (shouldFetchTranslations(dictionary, english)) {
+        return english;
+      }
+    }
+  }
+
+  const preference: DictionaryLanguageId[] = [
+    "fr",
+    "es",
+    "de",
+    "ja",
+    "it",
+    "pt-br",
+    "ru",
+    "ko",
+    "nl",
+    "ar",
+    "hi",
+    "cs",
+    "sk",
+    "tr",
+    "zh-hans",
+    "zh-hant",
+    "en-us",
+    "en-uk",
+  ];
+
+  for (const candidate of preference) {
+    if (shouldFetchTranslations(dictionary, candidate)) {
+      return candidate;
+    }
+  }
+
+  const fallback = LANGUAGES.find((lang) => shouldFetchTranslations(dictionary, lang.id));
+  return fallback?.id ?? "fr";
+}
+
 /** Compliant User-Agent for Wikimedia API requests. */
 export const WIKIMEDIA_USER_AGENT =
   "DictionaryOnClick/0.1.2 (browser extension; https://github.com/bishwo-dahal/dictionary-on-click)";

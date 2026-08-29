@@ -2,6 +2,10 @@ import { historyToCsv } from "../background/history.js";
 import { telemetryFailureRate } from "../background/telemetry.js";
 import { LANGUAGES } from "../shared/languages.js";
 import type { DictionaryLanguageId } from "../shared/languages.js";
+import {
+  defaultTranslationTarget,
+  shouldFetchTranslations,
+} from "../shared/languages.js";
 import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.js";
 import type { ProviderHealthInfo, TelemetrySnapshot } from "../shared/telemetry-types.js";
 import type { ThemeMode } from "../shared/theme.js";
@@ -15,6 +19,12 @@ const dictSelect = document.getElementById(
 const targetSelect = document.getElementById(
   "target-language",
 ) as HTMLSelectElement;
+const translationTargetLabel = document.getElementById(
+  "translation-target-label",
+) as HTMLLabelElement;
+const translationsEnabledCheck = document.getElementById(
+  "translations-enabled",
+) as HTMLInputElement;
 const bubblePreviewMaxSelect = document.getElementById(
   "bubble-preview-max",
 ) as HTMLSelectElement;
@@ -146,6 +156,21 @@ async function refreshReportsCount(): Promise<void> {
   }
 }
 
+function syncTranslationControls(enabled: boolean): void {
+  translationTargetLabel.hidden = !enabled;
+  targetSelect.disabled = !enabled;
+}
+
+function ensureTranslationTarget(
+  dictionaryLanguage: DictionaryLanguageId,
+  targetLanguage: DictionaryLanguageId,
+): DictionaryLanguageId {
+  if (!shouldFetchTranslations(dictionaryLanguage, targetLanguage)) {
+    return defaultTranslationTarget(dictionaryLanguage);
+  }
+  return targetLanguage;
+}
+
 async function init(): Promise<void> {
   watchTheme(document.documentElement, async () => (await load()).theme);
 
@@ -155,7 +180,16 @@ async function init(): Promise<void> {
   const settings = await load();
   themeSelect.value = settings.theme;
   dictSelect.value = settings.dictionaryLanguage;
-  targetSelect.value = settings.targetLanguage;
+  const targetLanguage = ensureTranslationTarget(
+    settings.dictionaryLanguage,
+    settings.targetLanguage,
+  );
+  targetSelect.value = targetLanguage;
+  translationsEnabledCheck.checked = settings.translationsEnabled;
+  syncTranslationControls(settings.translationsEnabled);
+  if (targetLanguage !== settings.targetLanguage) {
+    void save({ targetLanguage });
+  }
   bubblePreviewMaxSelect.value = String(settings.bubblePreviewMax);
   bubblePreviewPerPosSelect.value = String(settings.bubblePreviewPerPos);
   saveHistoryCheck.checked = settings.saveHistory;
@@ -167,8 +201,38 @@ async function init(): Promise<void> {
   });
 
   dictSelect.addEventListener("change", () => {
-    void save({ dictionaryLanguage: dictSelect.value as DictionaryLanguageId });
+    const dictionaryLanguage = dictSelect.value as DictionaryLanguageId;
+    const patch: Partial<UserSettings> = { dictionaryLanguage };
+    if (translationsEnabledCheck.checked) {
+      const nextTarget = ensureTranslationTarget(
+        dictionaryLanguage,
+        targetSelect.value as DictionaryLanguageId,
+      );
+      if (nextTarget !== targetSelect.value) {
+        targetSelect.value = nextTarget;
+        patch.targetLanguage = nextTarget;
+      }
+    }
+    void save(patch);
   });
+
+  translationsEnabledCheck.addEventListener("change", () => {
+    const enabled = translationsEnabledCheck.checked;
+    syncTranslationControls(enabled);
+    const patch: Partial<UserSettings> = { translationsEnabled: enabled };
+    if (enabled) {
+      const nextTarget = ensureTranslationTarget(
+        dictSelect.value as DictionaryLanguageId,
+        targetSelect.value as DictionaryLanguageId,
+      );
+      if (nextTarget !== targetSelect.value) {
+        targetSelect.value = nextTarget;
+        patch.targetLanguage = nextTarget;
+      }
+    }
+    void save(patch);
+  });
+
   targetSelect.addEventListener("change", () => {
     void save({ targetLanguage: targetSelect.value as DictionaryLanguageId });
   });

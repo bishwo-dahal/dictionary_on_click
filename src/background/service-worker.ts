@@ -2,10 +2,12 @@ import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.j
 import type { BrokenWordReport } from "../shared/telemetry-types.js";
 import type Browser from "webextension-polyfill";
 import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
+import { shouldFetchTranslations } from "../shared/languages.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
 import { getProviderHealth } from "./health.js";
 import { resolvePronunciationAudio } from "./pronunciation.js";
+import { fetchWiktionaryTranslations } from "./wiktionary-translations.js";
 import {
   clearTelemetry,
   getTelemetry,
@@ -16,6 +18,7 @@ import {
 
 const SETTINGS_KEY = "userSettings";
 const REPORT_KEY = "brokenWordReports";
+const TRANSLATION_FETCH_MS = 3_000;
 const orchestrator = getLookupOrchestrator();
 
 async function loadSettings(): Promise<UserSettings> {
@@ -156,6 +159,31 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
         prefetch: message.type === "prefetch",
         singleToken: message.singleToken,
       });
+
+      if (
+        response.ok &&
+        message.type === "lookup" &&
+        settings.translationsEnabled &&
+        shouldFetchTranslations(language, settings.targetLanguage)
+      ) {
+        response.result.translations = [];
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_MS);
+        try {
+          response.result.translations = await fetchWiktionaryTranslations(
+            response.result.word,
+            language,
+            settings.targetLanguage,
+            controller.signal,
+          );
+        } catch {
+          response.result.translations = [];
+        } finally {
+          clearTimeout(timer);
+        }
+      } else if (response.ok) {
+        response.result.translations = [];
+      }
 
       const durationMs = performance.now() - start;
 

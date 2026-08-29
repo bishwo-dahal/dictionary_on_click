@@ -8,6 +8,7 @@ import {
   createGlossList,
   createPosGroup,
 } from "../shared/render-definitions.js";
+import { createTranslationsSection } from "../shared/render-translations.js";
 import { getSettings } from "./messaging.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
@@ -150,6 +151,16 @@ export class DefinitionBubble {
         anchor,
       ),
     );
+
+    if (result.translations.length > 0) {
+      const translations = createTranslationsSection(
+        result.translations,
+        result.translations[0]!.language,
+      );
+      if (translations) {
+        this.card.append(translations);
+      }
+    }
 
     if (result.partial || result.stale) {
       const meta = document.createElement("p");

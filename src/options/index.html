@@ -30,12 +30,16 @@
           Dictionary language
           <select id="dictionary-language"></select>
         </label>
-        <label>
+        <label class="checkbox">
+          <input type="checkbox" id="translations-enabled" />
+          Show translations
+        </label>
+        <label id="translation-target-label" hidden>
           Translation target language
           <select id="target-language"></select>
         </label>
         <p class="hint">
-          Translations use Wiktionary content in the target language when available.
+          When enabled, glosses from Wiktionary appear in the bubble and toolbar lookup.
         </p>
       </section>
 

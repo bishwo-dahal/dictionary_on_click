@@ -201,4 +201,25 @@ export const POS_AND_ICON_STYLES = `
 }
 
 .card-header .headword { margin: 0; }
+
+.translations-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+}
+
+.translations-head {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted, #666);
+}
+
+.translations-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
 `;
