@@ -8,6 +8,7 @@ import {
   createGlossList,
   createPosGroup,
 } from "../shared/render-definitions.js";
+import { createRelatedWordsSections } from "../shared/render-related-words.js";
 import { createTranslationsSection } from "../shared/render-translations.js";
 import { getSettings } from "./messaging.js";
 import { watchTheme } from "../shared/theme-bind.js";
@@ -151,6 +152,10 @@ export class DefinitionBubble {
         anchor,
       ),
     );
+
+    for (const section of createRelatedWordsSections(result.synonyms, result.antonyms)) {
+      this.card.append(section);
+    }
 
     if (result.translations.length > 0) {
       const translations = createTranslationsSection(

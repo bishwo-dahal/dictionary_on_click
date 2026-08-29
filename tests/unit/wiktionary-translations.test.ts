@@ -6,6 +6,8 @@ import {
   cleanGlossText,
   extractTranslationsSection,
   fetchWiktionaryTranslations,
+  parseAntonyms,
+  parseSynonyms,
   parseTranslationGlosses,
 } from "../../src/background/wiktionary-translations.js";
 
@@ -117,6 +119,48 @@ describe("wiktionary-translations", () => {
 `;
     const glosses = parseTranslationGlosses(wikitext, "fr", "French");
     expect(glosses).toEqual([{ language: "French", text: "évider" }]);
+  });
+
+  it("parses {{l|}} templates in synonym sections (search-style)", () => {
+    const wikitext = `
+====Synonyms====
+* {{sense|transitive: look throughout (a place) for something}} {{l|en|comb}}, {{l|en|scour}}
+* {{sense|intransitive: look thoroughly}} {{l|en|look for}}, {{l|en|seek}}, {{l|en|comb}}, {{l|en|scour}}
+`;
+    const synonyms = parseSynonyms(wikitext, "en-us");
+    expect(synonyms).toEqual(["comb", "scour", "look for", "seek"]);
+    expect(synonyms.some((s) => s.includes("{"))).toBe(false);
+  });
+
+  it("rejects stray wiki bracket artifacts in synonym lists", () => {
+    const wikitext = `
+====Synonyms====
+* foo]], bar
+* ]]
+`;
+    const synonyms = parseSynonyms(wikitext, "en-us");
+    expect(synonyms).toEqual(["foo"]);
+    expect(synonyms.some((s) => /[\[\]]/.test(s))).toBe(false);
+  });
+
+  it("parses {{l|}} templates and skips Thesaurus links (know-style)", () => {
+    const wikitext = `
+====Synonyms====
+* {{sense|have sexual relations with}} {{l|en|coitize}}, {{l|en|go to bed with}}, {{l|en|sleep with}}; see also [[Thesaurus:copulate with]]
+`;
+    const synonyms = parseSynonyms(wikitext, "en-us");
+    expect(synonyms).toEqual(["coitize", "go to bed with", "sleep with"]);
+    expect(synonyms.some((s) => /[\[\]]/.test(s))).toBe(false);
+  });
+
+  it("parses English synonyms and antonyms from templates", () => {
+    const wikitext = `
+====Adjective====
+{{syn|en|ample|huge|large|Thesaurus:large}}
+{{ant|en|little|small|tiny}}
+`;
+    expect(parseSynonyms(wikitext, "en-us")).toEqual(["ample", "huge", "large"]);
+    expect(parseAntonyms(wikitext, "en-us")).toEqual(["little", "small", "tiny"]);
   });
 
   it("fetches glosses via the MediaWiki API", async () => {

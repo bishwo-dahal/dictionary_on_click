@@ -164,13 +164,19 @@ body {
   cursor: not-allowed;
 }
 
-.translations-section {
+.syn-ant-label {
+  margin-bottom: 12px;
+}
+
+.translations-section,
+.related-words-section {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 
-.translations-head {
+.translations-head,
+.related-words-head {
   margin: 0 0 6px;
   font-size: 12px;
   font-weight: 600;
@@ -179,7 +185,8 @@ body {
   color: var(--fg-muted);
 }
 
-.translations-body {
+.translations-body,
+.related-words-body {
   margin: 0;
   font-size: 13px;
   line-height: 1.45;

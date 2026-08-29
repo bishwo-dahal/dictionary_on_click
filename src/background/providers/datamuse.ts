@@ -75,6 +75,8 @@ export const datamuseProvider: LookupProvider = {
       language,
       definitions,
       translations: [],
+      synonyms: [],
+      antonyms: [],
       sourceUrl: `https://www.datamuse.com/words?sp=${encodeURIComponent(word)}`,
       provider: "datamuse",
       partial: true,

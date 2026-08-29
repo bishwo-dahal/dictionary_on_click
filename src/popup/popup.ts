@@ -14,6 +14,10 @@ import { createHeadwordHeader } from "../shared/headword-header.js";
 import { markReportButtonDone } from "../shared/pos.js";
 import { createPosGroup } from "../shared/render-definitions.js";
 import {
+  createRelatedWordsSections,
+  formatRelatedWordsForCopy,
+} from "../shared/render-related-words.js";
+import {
   createTranslationsSection,
   formatTranslationsForCopy,
 } from "../shared/render-translations.js";
@@ -28,6 +32,9 @@ const languageSelect = document.getElementById(
 ) as HTMLSelectElement;
 const translationsEnabledCheck = document.getElementById(
   "translations-enabled",
+) as HTMLInputElement;
+const synonymsAntonymsEnabledCheck = document.getElementById(
+  "synonyms-antonyms-enabled",
 ) as HTMLInputElement;
 const targetLanguageSelect = document.getElementById(
   "target-language-select",
@@ -96,7 +103,8 @@ function createActions(result: LookupResult): HTMLDivElement {
       return `${pos}${d.text}`;
     });
     const translationBlock = formatTranslationsForCopy(result.translations);
-    void navigator.clipboard.writeText(`${result.word}\n\n${lines.join("\n\n")}${translationBlock}`);
+    const relatedBlock = formatRelatedWordsForCopy(result.synonyms, result.antonyms);
+    void navigator.clipboard.writeText(`${result.word}\n\n${lines.join("\n\n")}${translationBlock}${relatedBlock}`);
     copyBtn.textContent = "Copied";
     window.setTimeout(() => {
       copyBtn.textContent = "Copy";
@@ -168,6 +176,9 @@ function renderSuccess(result: LookupResult): void {
     card.append(empty);
   } else {
     card.append(createDefinitionsBody(result));
+    for (const section of createRelatedWordsSections(result.synonyms, result.antonyms)) {
+      card.append(section);
+    }
     if (result.translations.length > 0) {
       const translations = createTranslationsSection(
         result.translations,
@@ -251,6 +262,7 @@ async function init(): Promise<void> {
     );
     targetLanguageSelect.value = targetLanguage;
     translationsEnabledCheck.checked = response.settings.translationsEnabled;
+    synonymsAntonymsEnabledCheck.checked = response.settings.synonymsAntonymsEnabled;
     themeSelect.value = response.settings.theme;
     syncTranslationControls(response.settings.translationsEnabled);
     if (targetLanguage !== response.settings.targetLanguage) {
@@ -302,6 +314,13 @@ async function init(): Promise<void> {
     void send({
       type: "saveSettings",
       settings,
+    });
+  });
+
+  synonymsAntonymsEnabledCheck.addEventListener("change", () => {
+    void send({
+      type: "saveSettings",
+      settings: { synonymsAntonymsEnabled: synonymsAntonymsEnabledCheck.checked },
     });
   });
 

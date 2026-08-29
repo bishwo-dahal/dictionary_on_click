@@ -23,6 +23,8 @@ export interface LookupResult {
   language: DictionaryLanguageId;
   definitions: Definition[];
   translations: Translation[];
+  synonyms: string[];
+  antonyms: string[];
   sourceUrl: string;
   provider: ProviderId;
   /** IPA or similar, when the provider supplies it. */
@@ -61,6 +63,8 @@ export interface UserSettings {
   targetLanguage: DictionaryLanguageId;
   /** When false, no Wiktionary gloss fetch or translation UI (default). */
   translationsEnabled: boolean;
+  /** When false, no synonym/antonym fetch or related-words UI (default). */
+  synonymsAntonymsEnabled: boolean;
   theme: ThemeMode;
   /** Collapsed double-click bubble: max meanings before "+ more". Prefers diverse parts of speech (POS) when possible. */
   bubblePreviewMax: BubblePreviewMax;
@@ -75,6 +79,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   dictionaryLanguage: "en-us",
   targetLanguage: "en-us",
   translationsEnabled: false,
+  synonymsAntonymsEnabled: false,
   theme: "system",
   bubblePreviewMax: 3,
   bubblePreviewPerPos: 1,

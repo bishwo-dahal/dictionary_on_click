@@ -20,6 +20,8 @@ function hitProvider(
             language: "en-us",
             definitions: [{ text: "definition" }],
             translations: [],
+            synonyms: [],
+            antonyms: [],
             sourceUrl: "https://example.com",
             provider: id,
             ...result,

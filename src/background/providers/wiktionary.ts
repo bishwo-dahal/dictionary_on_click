@@ -84,6 +84,8 @@ function buildResult(
     language,
     definitions,
     translations: [],
+    synonyms: [],
+    antonyms: [],
     sourceUrl: `${wiktionaryHost(wikiCode)}/wiki/${encodeURIComponent(title)}`,
     provider,
   };

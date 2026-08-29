@@ -2,12 +2,13 @@ import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.j
 import type { BrokenWordReport } from "../shared/telemetry-types.js";
 import type Browser from "webextension-polyfill";
 import { DEFAULT_SETTINGS, type UserSettings } from "../shared/types.js";
-import { shouldFetchTranslations } from "../shared/languages.js";
+import { shouldFetchTranslations, isEnglishDictionary } from "../shared/languages.js";
 import { addHistoryEntry, clearHistory, getHistory } from "./history.js";
 import { getLookupOrchestrator } from "./lookup-orchestrator.js";
 import { getProviderHealth } from "./health.js";
 import { resolvePronunciationAudio } from "./pronunciation.js";
-import { fetchWiktionaryTranslations } from "./wiktionary-translations.js";
+import { fetchDatamuseRelated } from "./datamuse-related.js";
+import { fetchWiktionaryEnrichment } from "./wiktionary-enrichment.js";
 import {
   clearTelemetry,
   getTelemetry,
@@ -19,6 +20,7 @@ import {
 const SETTINGS_KEY = "userSettings";
 const REPORT_KEY = "brokenWordReports";
 const TRANSLATION_FETCH_MS = 3_000;
+const ENRICHMENT_FETCH_MS = 3_500;
 const orchestrator = getLookupOrchestrator();
 
 async function loadSettings(): Promise<UserSettings> {
@@ -160,29 +162,79 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
         singleToken: message.singleToken,
       });
 
-      if (
-        response.ok &&
-        message.type === "lookup" &&
-        settings.translationsEnabled &&
-        shouldFetchTranslations(language, settings.targetLanguage)
-      ) {
+      if (response.ok && message.type === "lookup") {
         response.result.translations = [];
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_MS);
-        try {
-          response.result.translations = await fetchWiktionaryTranslations(
-            response.result.word,
-            language,
-            settings.targetLanguage,
-            controller.signal,
-          );
-        } catch {
-          response.result.translations = [];
-        } finally {
-          clearTimeout(timer);
+        response.result.synonyms = response.result.synonyms ?? [];
+        response.result.antonyms = response.result.antonyms ?? [];
+
+        const fetchTranslations =
+          settings.translationsEnabled &&
+          shouldFetchTranslations(language, settings.targetLanguage);
+        const fetchSynAnt = settings.synonymsAntonymsEnabled;
+
+        const priorSynonyms = response.result.synonyms ?? [];
+        const priorAntonyms = response.result.antonyms ?? [];
+
+        if (fetchTranslations || fetchSynAnt) {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), ENRICHMENT_FETCH_MS);
+          try {
+            const enriched = await fetchWiktionaryEnrichment(
+              response.result.word,
+              language,
+              {
+                targetLanguage: fetchTranslations ? settings.targetLanguage : null,
+                synonymsAntonyms: fetchSynAnt,
+              },
+              controller.signal,
+            );
+            if (fetchTranslations) {
+              response.result.translations = enriched.translations;
+            }
+            if (fetchSynAnt) {
+              response.result.synonyms =
+                enriched.synonyms.length > 0 ? enriched.synonyms : priorSynonyms;
+              response.result.antonyms =
+                enriched.antonyms.length > 0 ? enriched.antonyms : priorAntonyms;
+            }
+          } catch {
+            if (fetchTranslations) {
+              response.result.translations = [];
+            }
+            if (fetchSynAnt) {
+              response.result.synonyms = priorSynonyms;
+              response.result.antonyms = priorAntonyms;
+            }
+          } finally {
+            clearTimeout(timer);
+          }
+        }
+
+        if (
+          fetchSynAnt &&
+          isEnglishDictionary(language) &&
+          response.result.synonyms.length === 0 &&
+          response.result.antonyms.length === 0
+        ) {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_MS);
+          try {
+            const related = await fetchDatamuseRelated(
+              response.result.word,
+              controller.signal,
+            );
+            response.result.synonyms = related.synonyms;
+            response.result.antonyms = related.antonyms;
+          } catch {
+            // Keep any FDA-provided related words on the result.
+          } finally {
+            clearTimeout(timer);
+          }
         }
       } else if (response.ok) {
         response.result.translations = [];
+        response.result.synonyms = [];
+        response.result.antonyms = [];
       }
 
       const durationMs = performance.now() - start;

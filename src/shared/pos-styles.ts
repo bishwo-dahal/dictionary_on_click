@@ -208,7 +208,14 @@ export const POS_AND_ICON_STYLES = `
   border-top: 1px solid var(--border, rgba(0, 0, 0, 0.12));
 }
 
-.translations-head {
+.related-words-section {
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.translations-head,
+.related-words-head {
   margin: 0 0 4px;
   font-size: 11px;
   font-weight: 600;
@@ -217,7 +224,8 @@ export const POS_AND_ICON_STYLES = `
   color: var(--muted, #666);
 }
 
-.translations-body {
+.translations-body,
+.related-words-body {
   margin: 0;
   font-size: 13px;
   line-height: 1.4;

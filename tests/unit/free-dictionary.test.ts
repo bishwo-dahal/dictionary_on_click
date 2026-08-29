@@ -23,7 +23,9 @@ describe("freeDictionaryProvider", () => {
             ],
             meanings: [
               {
-                partOfSpeech: "noun",
+                partOfSpeech: "adjective",
+                synonyms: ["ample", "huge"],
+                antonyms: ["little", "small"],
                 definitions: [{ definition: "A procedure to check quality." }],
               },
             ],
@@ -43,6 +45,8 @@ describe("freeDictionaryProvider", () => {
       expect(outcome.result.definitions[0]?.text).toContain("procedure");
       expect(outcome.result.phonetic).toBe("/tɛst/");
       expect(outcome.result.audioUrl).toContain("test-us.mp3");
+      expect(outcome.result.synonyms).toEqual(["ample", "huge"]);
+      expect(outcome.result.antonyms).toEqual(["little", "small"]);
     }
   });
 });

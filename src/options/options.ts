@@ -25,6 +25,9 @@ const translationTargetLabel = document.getElementById(
 const translationsEnabledCheck = document.getElementById(
   "translations-enabled",
 ) as HTMLInputElement;
+const synonymsAntonymsEnabledCheck = document.getElementById(
+  "synonyms-antonyms-enabled",
+) as HTMLInputElement;
 const bubblePreviewMaxSelect = document.getElementById(
   "bubble-preview-max",
 ) as HTMLSelectElement;
@@ -186,6 +189,7 @@ async function init(): Promise<void> {
   );
   targetSelect.value = targetLanguage;
   translationsEnabledCheck.checked = settings.translationsEnabled;
+  synonymsAntonymsEnabledCheck.checked = settings.synonymsAntonymsEnabled;
   syncTranslationControls(settings.translationsEnabled);
   if (targetLanguage !== settings.targetLanguage) {
     void save({ targetLanguage });
@@ -231,6 +235,10 @@ async function init(): Promise<void> {
       }
     }
     void save(patch);
+  });
+
+  synonymsAntonymsEnabledCheck.addEventListener("change", () => {
+    void save({ synonymsAntonymsEnabled: synonymsAntonymsEnabledCheck.checked });
   });
 
   targetSelect.addEventListener("change", () => {
