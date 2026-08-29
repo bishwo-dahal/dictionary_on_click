@@ -159,6 +159,25 @@ body {
   margin: 0;
 }
 
+.feature-beta {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.translation-target-label[hidden] {
+  display: none !important;
+}
+
 .translation-target-label select:disabled {
   opacity: 0.55;
   cursor: not-allowed;
