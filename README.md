@@ -19,7 +19,7 @@ npm start     # load in Firefox
 
 - Node.js 20+
 - ImageMagick 7 (`magick`) — optional; for icon regeneration
-- Firefox 142+ or Chrome 120+
+- Firefox 140+ (including ESR) or Chrome 120+
 
 ## Build from source
 

@@ -77,7 +77,7 @@ export const datamuseProvider: LookupProvider = {
       translations: [],
       synonyms: [],
       antonyms: [],
-      sourceUrl: `https://www.datamuse.com/words?sp=${encodeURIComponent(word)}`,
+      sourceUrl: `https://www.onelook.com/?w=${encodeURIComponent(word)}`,
       provider: "datamuse",
       partial: true,
     };

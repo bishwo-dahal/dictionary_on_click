@@ -399,7 +399,7 @@ const entries: Record<string, DemoEntry> = {
   firefox: {
     lemma: 'Firefox',
     ipa: '/ˈfaɪəfɒks/',
-    senses: [{ pos: 'noun', posKey: 'noun', gloss: 'Mozilla\'s browser. Dictionary on Click supports Firefox 142 and newer.' }],
+    senses: [{ pos: 'noun', posKey: 'noun', gloss: 'Mozilla\'s browser. Dictionary on Click supports Firefox 140 and newer, including ESR.' }],
   },
   for: {
     lemma: 'for',
