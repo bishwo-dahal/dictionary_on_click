@@ -14,7 +14,7 @@ export const site = {
     'https://addons.mozilla.org/en-US/firefox/addon/dictionary-on-click/',
   chrome:
     'https://chromewebstore.google.com/detail/dictionary-on-click/hmjpafbglgihbbfamlljmcempfhfchjm',
-  firefoxMin: '142',
+  firefoxMin: '140',
   chromeMin: '120',
   license: 'MPL-2.0',
 } as const;
@@ -31,7 +31,7 @@ export const nav = [
 export const faqs = [
   {
     q: 'Does it work on Firefox and Chrome?',
-    a: 'Yes. Firefox 142 and newer, and Chrome 120 and newer. Same lookup behavior in both. Install from Firefox Add-ons or the Chrome Web Store.',
+    a: 'Yes. Firefox 140 and newer (including ESR), and Chrome 120 and newer. Same lookup behavior in both. Install from Firefox Add-ons or the Chrome Web Store.',
   },
   {
     q: 'Does it need an API key?',
