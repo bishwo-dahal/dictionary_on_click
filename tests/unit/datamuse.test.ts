@@ -46,5 +46,6 @@ describe("datamuseProvider", () => {
       },
     ]);
     expect(outcome.result.partial).toBe(true);
+    expect(outcome.result.sourceUrl).toBe("https://www.onelook.com/?w=different");
   });
 });
