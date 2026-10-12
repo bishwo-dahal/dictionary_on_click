@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2026-10-12)
+
+### New
+- Look up words inside text fields and editors (Typst, Google Docs, and similar). Toggle in the popup or Options. Password fields are never looked up.
+
+### Fixed
+- Datamuse "See full definition" now opens OneLook instead of a broken page.
+
+### Improved
+- Official support for Firefox 140+ (including ESR).
+
 ## 0.2.0 (2026-08-28)
 
 ### New

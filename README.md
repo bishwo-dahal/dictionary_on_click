@@ -8,7 +8,7 @@ Try it at: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/dictionary-o
 
 ## Status
 
-**v0.2.0**: optional translations and synonyms/antonyms (beta), faster lookups, and a scroll-friendlier definition bubble.
+**v0.3.0**: look up words in text fields and editors, Firefox 140+ / ESR, and a fixed Datamuse full-definition link.
 
 ```bash
 npm run ci    # test + build (Firefox + Chrome) + lint
