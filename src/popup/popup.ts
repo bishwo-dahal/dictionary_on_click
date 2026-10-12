@@ -21,6 +21,7 @@ import {
   createTranslationsSection,
   formatTranslationsForCopy,
 } from "../shared/render-translations.js";
+import { dismissEditableNudgeForever } from "../content/editable-nudge.js";
 import type { LookupResult, UserSettings } from "../shared/types.js";
 
 const REPORT_KEY = "brokenWordReports";
@@ -36,6 +37,9 @@ const translationsEnabledCheck = document.getElementById(
 ) as HTMLInputElement;
 const synonymsAntonymsEnabledCheck = document.getElementById(
   "synonyms-antonyms-enabled",
+) as HTMLInputElement;
+const allowEditableLookupsCheck = document.getElementById(
+  "allow-editable-lookups",
 ) as HTMLInputElement;
 const targetLanguageSelect = document.getElementById(
   "target-language-select",
@@ -311,6 +315,7 @@ async function init(): Promise<void> {
     targetLanguageSelect.value = targetLanguage;
     translationsEnabledCheck.checked = response.settings.translationsEnabled;
     synonymsAntonymsEnabledCheck.checked = response.settings.synonymsAntonymsEnabled;
+    allowEditableLookupsCheck.checked = response.settings.allowEditableLookups;
     themeSelect.value = response.settings.theme;
     syncTranslationControls(response.settings.translationsEnabled);
     if (targetLanguage !== response.settings.targetLanguage) {
@@ -387,6 +392,18 @@ async function init(): Promise<void> {
       type: "saveSettings",
       settings: { synonymsAntonymsEnabled: synonymsAntonymsEnabledCheck.checked },
     });
+  });
+
+  allowEditableLookupsCheck.addEventListener("change", () => {
+    void (async () => {
+      await send({
+        type: "saveSettings",
+        settings: { allowEditableLookups: allowEditableLookupsCheck.checked },
+      });
+      if (!allowEditableLookupsCheck.checked) {
+        await dismissEditableNudgeForever();
+      }
+    })();
   });
 
   targetLanguageSelect.addEventListener("change", () => {

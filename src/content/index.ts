@@ -1,5 +1,5 @@
 import { initContentController } from "./controller.js";
-import "./double-click.js";
+import { initDoubleClick } from "./double-click.js";
 import "./selection.js";
 
-void initContentController();
+void Promise.all([initContentController(), initDoubleClick()]);

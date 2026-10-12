@@ -15,6 +15,20 @@ export async function getSettings(): Promise<UserSettings> {
   return response.settings;
 }
 
+export async function saveSettings(
+  settings: Partial<UserSettings>,
+): Promise<UserSettings> {
+  const response = (await browser.runtime.sendMessage({
+    type: "saveSettings",
+    settings,
+  } satisfies BackgroundRequest)) as BackgroundResponse;
+
+  if (response.type !== "settings") {
+    throw new Error("Expected settings response");
+  }
+  return response.settings;
+}
+
 export async function lookupWord(
   word: string,
   language: DictionaryLanguageId,

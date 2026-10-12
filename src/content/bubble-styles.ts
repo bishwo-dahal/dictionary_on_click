@@ -111,6 +111,40 @@ a.btn:hover {
   filter: brightness(1.08);
 }
 
+.editable-nudge {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--bubble-border);
+}
+
+.editable-nudge-text {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--bubble-muted);
+}
+
+.editable-nudge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.editable-nudge-btn {
+  font: inherit;
+  font-size: 11px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.editable-nudge-btn:hover {
+  filter: brightness(1.08);
+}
+
 .skeleton {
   height: 12px;
   margin: 6px 0;

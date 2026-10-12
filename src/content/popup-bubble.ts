@@ -10,7 +10,13 @@ import {
 } from "../shared/render-definitions.js";
 import { createRelatedWordsSections } from "../shared/render-related-words.js";
 import { createTranslationsSection } from "../shared/render-translations.js";
-import { getSettings } from "./messaging.js";
+import {
+  dismissEditableNudgeForever,
+  getEditableNudgeCount,
+  incrementEditableNudgeCount,
+  shouldShowEditableNudge,
+} from "./editable-nudge.js";
+import { getSettings, saveSettings } from "./messaging.js";
 import type { BubbleAnchor } from "./selection-anchor.js";
 import { watchTheme } from "../shared/theme-bind.js";
 import { BUBBLE_STYLES } from "./bubble-styles.js";
@@ -63,14 +69,18 @@ export class DefinitionBubble {
     this.card.append(header, sk1, sk2, status);
   }
 
-  showResult(response: LookupResponse, anchor: BubbleAnchor): void {
+  showResult(
+    response: LookupResponse,
+    anchor: BubbleAnchor,
+    options: { fromEditable?: boolean } = {},
+  ): void {
     this.lastAnchor = anchor;
     this.mount(anchor);
     if (!this.card) {
       return;
     }
 
-    void this.populateResult(response, anchor);
+    void this.populateResult(response, anchor, options);
   }
 
   applyEnrichment(
@@ -120,7 +130,7 @@ export class DefinitionBubble {
     if (!this.lastAnchor) {
       return;
     }
-    this.showResult({ ok: true, result }, this.lastAnchor);
+    this.showResult({ ok: true, result }, this.lastAnchor, {});
   }
 
   updateAnchor(anchor: BubbleAnchor): void {
@@ -155,6 +165,7 @@ export class DefinitionBubble {
   private async populateResult(
     response: LookupResponse,
     anchor: BubbleAnchor,
+    options: { fromEditable?: boolean } = {},
   ): Promise<void> {
     if (!this.card) {
       return;
@@ -242,7 +253,67 @@ export class DefinitionBubble {
 
     actions.append(full);
     this.card.append(actions);
+
+    if (options.fromEditable && settings.allowEditableLookups) {
+      await this.maybeAppendEditableNudge(anchor);
+    }
+
     this.reposition(anchor);
+  }
+
+  private async maybeAppendEditableNudge(anchor: BubbleAnchor): Promise<void> {
+    if (!this.card) {
+      return;
+    }
+
+    const count = await getEditableNudgeCount();
+    if (!shouldShowEditableNudge(count)) {
+      return;
+    }
+
+    // Count each display immediately so dismiss/next lookup still consume the 3-show budget.
+    await incrementEditableNudgeCount();
+
+    const note = document.createElement("div");
+    note.className = "editable-nudge";
+    note.setAttribute("role", "note");
+
+    const text = document.createElement("p");
+    text.className = "editable-nudge-text";
+    text.textContent = "Looking up words in editors.";
+
+    const actions = document.createElement("div");
+    actions.className = "editable-nudge-actions";
+
+    const turnOff = document.createElement("button");
+    turnOff.type = "button";
+    turnOff.className = "editable-nudge-btn";
+    turnOff.textContent = "Turn off";
+    turnOff.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      void (async () => {
+        await saveSettings({ allowEditableLookups: false });
+        await dismissEditableNudgeForever();
+        note.remove();
+        this.reposition(anchor);
+      })();
+    });
+
+    const keepOn = document.createElement("button");
+    keepOn.type = "button";
+    keepOn.className = "editable-nudge-btn";
+    keepOn.textContent = "Keep on";
+    keepOn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      note.remove();
+      this.reposition(anchor);
+    });
+
+    actions.append(turnOff, keepOn);
+    note.append(text, actions);
+    this.card.append(note);
   }
 
   private buildMeaningsRegion(
