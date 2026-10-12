@@ -70,6 +70,8 @@ export interface UserSettings {
   bubblePreviewMax: BubblePreviewMax;
   /** Collapsed bubble: max meanings taken from each POS bucket when multiple parts of speech exist. */
   bubblePreviewPerPos: BubblePreviewPerPos;
+  /** When true, double-click lookups work inside text fields and editors (not password inputs). */
+  allowEditableLookups: boolean;
   saveHistory: boolean;
   allowExternalHistory: boolean;
   allowedExtensionIds: string[];
@@ -83,6 +85,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   theme: "system",
   bubblePreviewMax: 3,
   bubblePreviewPerPos: 1,
+  allowEditableLookups: true,
   saveHistory: false,
   allowExternalHistory: false,
   allowedExtensionIds: [],

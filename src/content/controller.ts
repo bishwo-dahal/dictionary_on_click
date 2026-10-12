@@ -43,7 +43,11 @@ export function anchorFromSelection(): BubbleAnchor | null {
 export async function runLookup(
   word: string,
   anchor: BubbleAnchor,
-  options: { prefetch?: boolean; singleToken?: boolean },
+  options: {
+    prefetch?: boolean;
+    singleToken?: boolean;
+    fromEditable?: boolean;
+  },
 ): Promise<void> {
   const requestId = crypto.randomUUID();
 
@@ -67,7 +71,7 @@ export async function runLookup(
     return;
   }
 
-  bubble.showResult(response, anchor);
+  bubble.showResult(response, anchor, { fromEditable: options.fromEditable });
 }
 
 export function dismissBubble(): void {

@@ -10,6 +10,7 @@ import type { BackgroundRequest, BackgroundResponse } from "../shared/messages.j
 import type { ProviderHealthInfo, TelemetrySnapshot } from "../shared/telemetry-types.js";
 import type { ThemeMode } from "../shared/theme.js";
 import { watchTheme } from "../shared/theme-bind.js";
+import { dismissEditableNudgeForever } from "../content/editable-nudge.js";
 import type { UserSettings, BubblePreviewMax, BubblePreviewPerPos } from "../shared/types.js";
 
 const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
@@ -34,6 +35,9 @@ const bubblePreviewMaxSelect = document.getElementById(
 const bubblePreviewPerPosSelect = document.getElementById(
   "bubble-preview-per-pos",
 ) as HTMLSelectElement;
+const allowEditableLookupsCheck = document.getElementById(
+  "allow-editable-lookups",
+) as HTMLInputElement;
 const saveHistoryCheck = document.getElementById(
   "save-history",
 ) as HTMLInputElement;
@@ -196,6 +200,7 @@ async function init(): Promise<void> {
   }
   bubblePreviewMaxSelect.value = String(settings.bubblePreviewMax);
   bubblePreviewPerPosSelect.value = String(settings.bubblePreviewPerPos);
+  allowEditableLookupsCheck.checked = settings.allowEditableLookups;
   saveHistoryCheck.checked = settings.saveHistory;
   allowExternalCheck.checked = settings.allowExternalHistory;
   allowedIdsInput.value = settings.allowedExtensionIds.join("\n");
@@ -255,6 +260,15 @@ async function init(): Promise<void> {
     void save({
       bubblePreviewPerPos: Number(bubblePreviewPerPosSelect.value) as BubblePreviewPerPos,
     });
+  });
+
+  allowEditableLookupsCheck.addEventListener("change", () => {
+    void (async () => {
+      await save({ allowEditableLookups: allowEditableLookupsCheck.checked });
+      if (!allowEditableLookupsCheck.checked) {
+        await dismissEditableNudgeForever();
+      }
+    })();
   });
 
   saveHistoryCheck.addEventListener("change", () => {

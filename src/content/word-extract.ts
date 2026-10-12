@@ -1,7 +1,7 @@
 const WORD_CHAR = /[\p{L}\p{M}][\p{L}\p{M}\p{N}'-]*/u;
 const WORD_EDGE = /[\p{L}\p{M}\p{N}'-]/u;
 
-/** Skip inputs and editable regions. */
+/** True for inputs, textareas, selects, and contenteditable regions. */
 export function isEditableTarget(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
   if (!el?.closest) {
@@ -10,6 +10,48 @@ export function isEditableTarget(target: EventTarget | null): boolean {
   return !!el.closest(
     'input, textarea, select, option, [contenteditable=""], [contenteditable="true"]',
   );
+}
+
+/** Password fields are never looked up. */
+export function isPasswordInput(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el?.closest) {
+    return false;
+  }
+  const input = el.closest("input");
+  return input instanceof HTMLInputElement && input.type === "password";
+}
+
+/** Selects are editable for forms but not useful for word lookup. */
+export function isSelectTarget(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el?.closest) {
+    return false;
+  }
+  return !!el.closest("select, option");
+}
+
+/**
+ * Word from a plain text control value and selection range
+ * (input/textarea after double-click).
+ */
+export function wordFromTextControl(
+  value: string,
+  selectionStart: number | null,
+  selectionEnd: number | null,
+): string {
+  if (selectionStart == null || selectionEnd == null) {
+    return "";
+  }
+
+  if (selectionEnd > selectionStart) {
+    const selected = value.slice(selectionStart, selectionEnd).trim();
+    if (selected && WORD_CHAR.test(selected) && !/\s/.test(selected)) {
+      return selected.match(WORD_CHAR)?.[0] ?? selected;
+    }
+  }
+
+  return wordAtOffsetInText(value, selectionStart);
 }
 
 /** Extract word around an offset in a plain string (for tests and text nodes). */
@@ -85,6 +127,31 @@ export function wordFromDoubleClick(event: MouseEvent): string {
   }
 
   return wordAtPoint(event.clientX, event.clientY);
+}
+
+/**
+ * Word from a double-click inside an editable: input/textarea selection, else
+ * the same selection/caret path used for page text.
+ */
+export function wordFromEditableDoubleClick(event: MouseEvent): string {
+  if (isPasswordInput(event.target) || isSelectTarget(event.target)) {
+    return "";
+  }
+
+  const el = event.target as HTMLElement | null;
+  const control = el?.closest?.("input, textarea");
+  if (
+    control instanceof HTMLInputElement ||
+    control instanceof HTMLTextAreaElement
+  ) {
+    return wordFromTextControl(
+      control.value,
+      control.selectionStart,
+      control.selectionEnd,
+    );
+  }
+
+  return wordFromDoubleClick(event);
 }
 
 export function selectionTextForPrefetch(): string | null {
